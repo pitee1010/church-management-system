@@ -27,19 +27,20 @@
             background: linear-gradient(rgba(10, 46, 82, 0.8), rgba(10, 46, 82, 0.8)), 
                         url('Pictures/bg.jpg') no-repeat center center fixed;
             background-size: cover;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--text);
-            overflow: hidden;
+            overflow-x: hidden;
+            padding: 24px;
         }
 
         .auth-shell {
             display: flex;
             width: 900px;
             max-width: 95%;
-            height: 600px;
+            min-height: 600px;
             background: var(--glass);
             backdrop-filter: blur(15px);
             border-radius: 20px;
@@ -128,7 +129,54 @@
         /* Responsive */
         @media (max-width: 768px) {
             .auth-hero { display: none; }
-            .auth-shell { width: 400px; height: auto; }
+            body {
+                align-items: stretch;
+                padding: 16px;
+            }
+
+            .auth-shell {
+                width: 100%;
+                max-width: 440px;
+                min-height: auto;
+                height: auto;
+            }
+
+            .auth-panel {
+                padding: 30px 22px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+                line-height: 1.15;
+            }
+
+            .links {
+                gap: 12px;
+                align-items: stretch;
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 420px) {
+            body {
+                padding: 10px;
+            }
+
+            .auth-shell {
+                max-width: 100%;
+                border-radius: 16px;
+            }
+
+            .auth-panel {
+                padding: 26px 16px;
+            }
+
+            input,
+            button {
+                min-height: 48px;
+                font-size: 0.95rem;
+            }
         }
     </style>
 </head>

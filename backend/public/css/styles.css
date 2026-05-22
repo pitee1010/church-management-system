@@ -48,6 +48,14 @@ body {
         linear-gradient(180deg, #f8fbff, var(--bg));
     color: var(--text);
     line-height: 1.6;
+    overflow-x: hidden;
+}
+
+img,
+video,
+canvas,
+svg {
+    max-width: 100%;
 }
 
 a {
@@ -314,6 +322,7 @@ input[type="file"] {
 
 .table-wrapper {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     border: 1px solid var(--border);
     border-radius: 22px;
     background: var(--card-strong);
@@ -321,6 +330,7 @@ input[type="file"] {
 
 table {
     width: 100%;
+    min-width: 720px;
     border-collapse: separate;
     border-spacing: 0;
     background: var(--card-strong);
@@ -1025,15 +1035,50 @@ tbody tr:last-child td {
 }
 
 @media (max-width: 768px) {
+    :root {
+        --radius-xl: 22px;
+        --radius-lg: 18px;
+        --radius-md: 14px;
+        --radius-sm: 12px;
+    }
+
     .container,
     .page {
-        padding: 24px 16px 48px;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 18px 14px 42px !important;
     }
 
     .page-header,
     .topbar,
     .header {
         align-items: stretch;
+        gap: 12px;
+    }
+
+    .page-header h1,
+    .topbar h1,
+    .header h1,
+    h1.page-title {
+        font-size: 1.8rem;
+        line-height: 1.12;
+        word-break: break-word;
+    }
+
+    .card,
+    .dashboard,
+    .section,
+    .chart-box,
+    .role-panel,
+    .light-panel,
+    .report-panel,
+    .modal-content,
+    .modal-panel,
+    .type-card,
+    .utility-card {
+        padding: 18px !important;
+        border-radius: 18px !important;
     }
 
     .header-actions,
@@ -1048,6 +1093,44 @@ tbody tr:last-child td {
     .btn,
     .action-btn {
         width: 100%;
+        min-height: 46px;
+        padding: 11px 14px;
+        white-space: normal;
+    }
+
+    input,
+    select,
+    textarea {
+        min-height: 48px;
+        padding: 12px 14px;
+        border-radius: 13px;
+        font-size: 16px;
+    }
+
+    .form-grid,
+    .manage-form,
+    .media-grid,
+    .stats {
+        grid-template-columns: 1fr !important;
+    }
+
+    .list-item,
+    .context-bar,
+    .album-group-header,
+    .songs-folder-header,
+    .songs-folder-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .table-wrapper {
+        border-radius: 16px;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        font-size: 0.9rem;
     }
 
     .album-feed-card {
@@ -1087,6 +1170,27 @@ tbody tr:last-child td {
 }
 
 @media (max-width: 640px) {
+    .modal {
+        padding: 10px;
+    }
+
+    .modal-content,
+    .modal-panel {
+        margin-top: 2vh;
+        max-height: 94vh;
+        overflow-y: auto;
+    }
+
+    .page-kicker,
+    .eyebrow,
+    .panel-chip,
+    .context-badge,
+    .badge {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
     .album-masonry {
         column-count: 1;
     }

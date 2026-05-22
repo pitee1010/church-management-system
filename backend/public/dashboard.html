@@ -401,12 +401,43 @@ body {
 @media (max-width: 760px) {
     .topbar {
         grid-template-columns: 1fr;
+        padding: 16px;
+        border-radius: 20px;
+        text-align: center;
+    }
+
+    .brand {
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .brand-mark {
+        width: 54px;
+        height: 54px;
     }
 
     .hero-copy,
     .hero-stage,
     .role-panel {
         padding: 22px;
+    }
+
+    .hero-copy h2 {
+        max-width: none;
+        font-size: 2rem;
+    }
+
+    .hero-stage {
+        min-height: auto;
+    }
+
+    .slide-card {
+        padding: 18px;
+    }
+
+    .slide-description {
+        min-height: auto;
     }
 
     .hero-metrics,
@@ -420,6 +451,32 @@ body {
     .slide-visual {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .slide-actions {
+        width: 100%;
+    }
+
+    .slide-control {
+        flex: 1 1 0;
+        width: auto;
+    }
+}
+
+@media (max-width: 420px) {
+    .hero-copy,
+    .hero-stage,
+    .role-panel {
+        padding: 16px;
+        border-radius: 18px;
+    }
+
+    .hero-copy h2 {
+        font-size: 1.75rem;
+    }
+
+    .panel-title h2 {
+        font-size: 1.5rem;
     }
 }
 </style>
@@ -1010,4 +1067,3 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
 <script src="js/pwa.js"></script>
 </body>
 </html>
-

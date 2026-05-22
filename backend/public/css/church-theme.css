@@ -210,3 +210,43 @@ body.church-theme::after {
     color: var(--primary-dark);
     font-weight: 700;
 }
+
+@media (max-width: 768px) {
+    body.church-theme {
+        background-attachment: scroll;
+    }
+
+    body.church-theme::before,
+    body.church-theme::after {
+        display: none;
+    }
+
+    .church-theme nav {
+        align-items: stretch;
+        border-radius: 18px;
+        padding: 12px;
+    }
+
+    .church-theme nav a,
+    .church-theme nav button,
+    .church-theme nav span {
+        width: 100%;
+        text-align: center;
+    }
+
+    .church-theme nav span[style*="float:right"] {
+        margin-left: 0;
+    }
+
+    .church-theme .welcome-pill {
+        width: 100%;
+        justify-content: center;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .church-theme .action-link {
+        padding: 18px;
+        border-radius: 18px;
+    }
+}

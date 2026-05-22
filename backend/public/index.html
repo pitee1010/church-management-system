@@ -17,10 +17,11 @@
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
-            background: url("assets/bg.jpg") no-repeat center center fixed;
+            background: url("assets/bg.jpg") no-repeat center center;
             background-size: cover;
             color: white;
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         .overlay {
@@ -42,6 +43,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 18px;
         }
 
         .logo {
@@ -84,10 +86,11 @@
         }
 
         .hero-text h1 {
-            font-size: 3.5rem;
+            font-size: clamp(2.2rem, 7vw, 3.5rem);
             margin-bottom: 10px;
             color: var(--accent-gold);
             text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            line-height: 1.08;
         }
 
         /* 1. SLIDER (Resized) */
@@ -171,7 +174,7 @@
         .section { padding: 60px 5%; text-align: center; }
         .media-grid { display: flex; justify-content: center; gap: 25px; flex-wrap: wrap; }
         video, audio {
-            width: 350px;
+            width: min(350px, 100%);
             border-radius: 10px;
             background: #000;
         }
@@ -202,6 +205,97 @@
             margin-top: 40px;
             font-size: 0.8rem;
             color: #888;
+        }
+
+        @media (max-width: 900px) {
+            header {
+                padding: 0.85rem 4%;
+            }
+
+            .nav-bar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .nav-links,
+            .auth-links {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .nav-links a {
+                margin: 0;
+                padding: 8px 0;
+            }
+
+            .auth-links .login-btn,
+            .auth-links .register-btn {
+                margin-left: 0;
+            }
+
+            .hero-text {
+                padding: 56px 18px;
+            }
+
+            .info-section,
+            .section,
+            footer {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+
+            .slides img {
+                height: 260px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .logo {
+                font-size: 1rem;
+                line-height: 1.25;
+            }
+
+            .nav-links a,
+            .auth-links .login-btn,
+            .auth-links .register-btn {
+                font-size: 0.82rem;
+            }
+
+            .auth-links .login-btn,
+            .auth-links .register-btn {
+                flex: 1 1 130px;
+                text-align: center;
+            }
+
+            .hero-text {
+                padding: 44px 16px;
+            }
+
+            .info-section h2 {
+                font-size: 2rem !important;
+                line-height: 1.15;
+            }
+
+            .marquee-content img {
+                width: 170px;
+                height: 108px;
+                margin: 0 10px;
+            }
+
+            .slides img {
+                height: 220px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
         }
     </style>
 </head>
@@ -287,7 +381,6 @@
     <section class="section" style="background: rgba(255,255,255,0.05);">
         <h2 style="color: var(--accent-gold);">Worship & Praise</h2>
         <div class="media-grid">
-            <audio controls><source src="assets/Jimmy Swaggart - Let Me Thank You Again (128).mp3" type="audio/mpeg"></audio>
             <audio controls><source src="assets/Jimmy Swaggart - Wasted Years [o0m4JKNwxBo].mp3" type="audio/mpeg"></audio>
         </div>
     </section>
