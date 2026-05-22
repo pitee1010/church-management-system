@@ -8,7 +8,7 @@
         "dev": "nodemon server.js",
         "db:check": "node check_schema.js"
     },
-    "author": "RONALD",
+    "author": "PURITY",
     "license": "ISC",
     "dependencies": {
         "bcryptjs": "^3.0.3",

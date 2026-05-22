@@ -45,6 +45,8 @@ exports.createMember = async (member) => {
         "INSERT INTO members (name,gender,department,phone,photo_url,address,created_by) VALUES (?,?,?,?,?,?,?)",
         [name, gender || null, serializedDepartments, phone, photo_url || null, address, created_by]
     );
+    const attendanceCode = `CHM-${String(result.insertId).padStart(6, "0")}`;
+    await db.execute("UPDATE members SET attendance_code = ? WHERE id = ?", [attendanceCode, result.insertId]);
     return result.insertId;
 };
 
@@ -68,6 +70,11 @@ exports.getById = async (id) => {
 
 exports.getMemberByName = async (name) => {
     const [rows] = await db.execute("SELECT * FROM members WHERE name = ?", [name]);
+    return attachDepartments(rows[0]);
+};
+
+exports.getMemberByAttendanceCode = async (attendanceCode) => {
+    const [rows] = await db.execute("SELECT * FROM members WHERE attendance_code = ? LIMIT 1", [attendanceCode]);
     return attachDepartments(rows[0]);
 };
 

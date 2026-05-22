@@ -9,23 +9,33 @@ exports.addDonation = async ({ donor_name, amount, donation_date, contribution_t
 };
 
 exports.getAll = async (user, contributionType) => {
-  // Allow all authenticated users to view donations (read-only)
-  let rows;
+  const filters = [];
+  const values = [];
+
   if (contributionType && contributionType !== 'all') {
-    [rows] = await db.execute(
-      `SELECT d.id, d.donor_name as user_name, d.amount, d.donation_date as date, d.contribution_type, d.payment_method, d.payment_reference, d.description, d.created_by
-       FROM donations d
-       WHERE d.contribution_type = ?
-       ORDER BY d.donation_date DESC`,
-      [contributionType]
-    );
-  } else {
-    [rows] = await db.execute(
-      `SELECT d.id, d.donor_name as user_name, d.amount, d.donation_date as date, d.contribution_type, d.payment_method, d.payment_reference, d.description, d.created_by
-       FROM donations d
-       ORDER BY d.donation_date DESC`
-    );
+    filters.push('d.contribution_type = ?');
+    values.push(contributionType);
   }
+
+  if (!user || user.role !== 'admin') {
+    const accountName = String(user?.name || '').trim();
+    if (!accountName) {
+      return [];
+    }
+
+    filters.push('LOWER(TRIM(d.donor_name)) = LOWER(TRIM(?))');
+    values.push(accountName);
+  }
+
+  const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+  const [rows] = await db.execute(
+    `SELECT d.id, d.donor_name as user_name, d.amount, d.donation_date as date, d.contribution_type, d.payment_method, d.payment_reference, d.description, d.created_by
+     FROM donations d
+     ${whereClause}
+     ORDER BY d.donation_date DESC`,
+    values
+  );
+
   return rows;
 };
 

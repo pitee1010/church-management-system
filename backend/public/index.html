@@ -3,46 +3,328 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ministry of Repentance and Holiness - Umoja Main Altar</title>
-    <link rel="stylesheet" href="css/auth.css">
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0f6ecf">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Church App">
-<link rel="apple-touch-icon" href="assets/icon-192.png"></head>
-<body class="auth-page">
-    <main class="auth-shell auth-shell-single">
-        <section class="auth-panel welcome-panel">
-            <div class="top">
-                <div class="cross">✝</div>
-                <h1>Ministry of Repentance and Holiness</h1>
-                <p class="auth-subtitle">
-                    We are a ministry committed to calling the nations to repentance, righteousness, and holiness, preparing the Church for the glorious coming of the Messiah.
+    <title>Ministry of Repentance and Holiness</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0a2e52;
+            --accent-gold: #d4af37;
+            --text-light: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: url("assets/bg.jpg") no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            line-height: 1.6;
+        }
+
+        .overlay {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8));
+            min-height: 100vh;
+        }
+
+        /* HEADER & NAV */
+        header {
+            background: rgba(10, 46, 82, 0.95);
+            padding: 1rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-links a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover { color: var(--accent-gold); }
+
+        .auth-links .login-btn, .auth-links .register-btn {
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-left: 10px;
+            transition: var(--transition);
+        }
+
+        .login-btn { border: 2px solid var(--accent-gold); color: white; }
+        .login-btn:hover { background: var(--accent-gold); color: black; }
+        .register-btn { background: var(--accent-gold); color: black; }
+        .register-btn:hover { transform: scale(1.05); }
+
+        /* HERO SECTION */
+        .hero-text {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            color: var(--accent-gold);
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        }
+
+        /* 1. SLIDER (Resized) */
+        .slider { width: 100%; overflow: hidden; border-bottom: 5px solid var(--accent-gold); }
+        .slides { display: flex; width: 400%; animation: slide 20s infinite; }
+        .slides img { 
+            width: 100%; 
+            height: 400px; 
+            object-fit: cover; 
+        }
+
+        @keyframes slide {
+            0%, 20% { transform: translateX(0); }
+            25%, 45% { transform: translateX(-25%); }
+            50%, 70% { transform: translateX(-50%); }
+            75%, 100% { transform: translateX(-75%); }
+        }
+
+        /* 2. MARQUEE (Dynamic Scroll) */
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px 0;
+            border-bottom: 2px solid var(--accent-gold);
+        }
+
+        .marquee-content {
+            display: flex;
+            width: calc(250px * 10);
+            animation: scroll 30s linear infinite;
+        }
+
+        .marquee-content img {
+            width: 220px;
+            height: 140px;
+            margin: 0 15px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-250px * 5)); }
+        }
+
+        /* 3. INFO SECTION & CONSTANT IMAGES */
+        .info-section {
+            padding: 60px 10%;
+            background: rgba(10, 46, 82, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .constant-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--accent-gold);
+        }
+
+        .card h3 { color: var(--accent-gold); }
+
+        /* MEDIA SECTION */
+        .section { padding: 60px 5%; text-align: center; }
+        .media-grid { display: flex; justify-content: center; gap: 25px; flex-wrap: wrap; }
+        video, audio {
+            width: 350px;
+            border-radius: 10px;
+            background: #000;
+        }
+
+        /* FOOTER (Matched to Photo) */
+        footer {
+            background: #05162a;
+            color: white;
+            padding: 60px 10% 20px;
+            border-top: 2px solid var(--accent-gold);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: left;
+        }
+
+        .footer-content h4 { color: var(--accent-gold); margin-bottom: 20px; font-size: 1.1rem; }
+        .footer-content p, .footer-content a { color: #ccc; text-decoration: none; font-size: 0.9rem; }
+        .footer-content a:hover { color: var(--accent-gold); }
+
+        .copyright {
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+            margin-top: 40px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="overlay">
+    <header>
+        <div class="nav-bar">
+            <div class="logo">Repentance & Holiness</div>
+            <nav class="nav-links">
+                <a href="#">Home</a>
+                <a href="gallary.html">Gallery</a>
+                <a href="sermon.html">Sermons</a>
+                <a href="worship.html">Worship</a>
+            </nav>
+            <div class="auth-links">
+                <a href="login.html" class="login-btn">Login</a>
+                <a href="register.html" class="register-btn">Register</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero-text">
+        <h1>Preparing The Way</h1>
+        <p>Join us in the global mission of total repentance and absolute holiness.</p>
+    </section>
+      <section class="info-section">
+        <h2 style="text-align:center; font-size: 2.5rem;">Our Ministry Vision</h2>
+        <div class="grid-container">
+            <div class="card">
+                <img src="assets/bg.jpg" class="constant-img" alt="Word">
+                <h3>The Word</h3>
+                <p>Pure biblical teachings focusing on righteousness and the fear of God.</p>
+            </div>
+            <div class="card">
+                <img src="assets/IMG-20231219-WA0034.jpg" class="constant-img" alt="Mission">
+                <h3>The Mission</h3>
+                <p>Reaching all nations with the message of Repentance and healing.</p>
+            </div>
+            <div class="card">
+                <img src="assets/IMG-20231219-WA0036.jpg" class="constant-img" alt="Events">
+                <h3>Global Events</h3>
+                <p>Live streams of massive healing altars and conferences worldwide.</p>
+            </div>
+        </div>
+    </section>
+  <div class="marquee-container">
+        <div class="marquee-content">
+            <img src="assets/7a5e6b93617a6a3f6539258edfd64c94.png" alt="1">
+            <img src="assets/53ea554392b5db941f977291507172ce.png" alt="2">
+            <img src="assets/19875ebf1d633e553e5b0082deca9b6a.png" alt="3">
+            <img src="assets/5efa1efcdb1913e68c23b904fb16644a.png" alt="4">
+            <img src="assets/ad38be7175c3aa9ca36f321c418ac34b.png" alt="5">
+            <img src="assets/IMG-20231219-WA0036.jpg" alt="1">
+            <img src="assets/IMG-20231219-WA0036.jpg" alt="2">
+            <img src="assets/IMG-20231219-WA0039.jpg" alt="3">
+            <img src="assets/IMG-20231219-WA0038.jpg" alt="4">
+            <img src="assets/20250817_112943.png" alt="5">
+        </div>
+    </div>
+
+    <section class="slider">
+        <div class="slides">
+            <img src="assets/IMG-20231219-WA0034.jpg" alt="Slide 1">
+            <img src="assets/IMG-20231219-WA0034.jpg" alt="Slide 2">
+            <img src="assets/IMG-20231219-WA0036.jpg" alt="Slide 3">
+            <img src="assets/IMG-20231219-WA0039.jpg" alt="Slide 4">
+        </div>
+    </section>
+
+  
+  
+
+    <section class="section">
+        <h2 style="color: var(--accent-gold);">Live Sermons</h2>
+        <div class="media-grid">
+            <video controls><source src="assets/26130957240258db8e3ce2aa02a537af.mp4" type="video/mp4"></video>
+            <video controls><source src="assets/603079446b193ee1864c93a1831dd86c.mp4" type="video/mp4"></video>
+        </div>
+    </section>
+
+    <section class="section" style="background: rgba(255,255,255,0.05);">
+        <h2 style="color: var(--accent-gold);">Worship & Praise</h2>
+        <div class="media-grid">
+            <audio controls><source src="assets/Jimmy Swaggart - Let Me Thank You Again (128).mp3" type="audio/mpeg"></audio>
+            <audio controls><source src="assets/Jimmy Swaggart - Wasted Years [o0m4JKNwxBo].mp3" type="audio/mpeg"></audio>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div>
+                <h4>About The Ministry</h4>
+                <p>Leading the world in repentance and preparing the way for the coming of the King. Join our global family today.</p>
+            </div>
+            <div>
+                <h4>Quick Links</h4>
+                <p><a href="https://www.repentandpreparetheway.org/" target="_blank">Latest Sermons</a></p>
+                <p><a href="#">Healing Decrees</a></p>
+                <p><a href="https://jesusislordradio.info/" target="_blank">Radio Jesus Is Lord</a></p>
+            </div>
+            <div>
+                <h4>Contact Us</h4>
+                <p>📍 Nairobi, Kenya (Global HQ)</p>
+                <p>📧 <a href="mailto:contact@repentandprepare.org">contact@repentandprepare.org</a></p>
+                <p>📞 +254 700 000 000</p>
+            </div>
+            <div>
+                <h4>Follow Us</h4>
+                <p>
+                    <a href="https://www.youtube.com/@repentpreparetheway" target="_blank">YouTube</a> | 
+                    <a href="https://web.facebook.com/ProphetDrDavidOwuor" target="_blank">Facebook</a> | 
+                    <a href="https://x.com/Prophet_DrOwuor" target="_blank">Twitter</a> |
+                    <a href="https://instagram.com/jesusiscoming_2" target="_blank">Instagram</a>
                 </p>
             </div>
+        </div>
+        <div class="copyright">
+            <p>© 2026 Ministry of Repentance and Holiness. All Rights Reserved.</p>
+        </div>
+    </footer>
+</div>
 
-            <ul class="auth-list">
-                <li>
-                    <strong>Admins</strong>
-                    Track attendance, members, and contributions with clearer structure.
-                </li>
-                <li>
-                    <strong>Users</strong>
-                    Stay aligned on programs, announcements, and events.
-                </li>
-                <li>
-                    <strong>For Members</strong>
-                    Access giving, weekly programs, and personal attendance reports more easily.
-                </li>
-            </ul>
-
-            <div class="auth-actions">
-                <a class="auth-button" href="login.html">Login</a>
-                <a class="auth-button secondary" href="register.html">Register</a>
-            </div>
-        </section>
-    </main>
-<script src="js/pwa.js"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 const db = require("../utils/db");
 
-exports.addAttendance = async ({ memberId, date, createdBy }) => {
+exports.addAttendance = async ({ memberId, date, createdBy, source = "manual" }) => {
   // 'date' param maps to check_in column in DB
   let checkInStr;
   
@@ -48,18 +48,24 @@ exports.addAttendance = async ({ memberId, date, createdBy }) => {
   // Prevent duplicate records for the same member on the same date.
   const dateOnly = checkInStr.split(' ')[0];
   const [existing] = await db.execute(
-    "SELECT id, member_id, check_in FROM attendance WHERE member_id = ? AND DATE(check_in) = ? LIMIT 1",
+    "SELECT id, member_id, check_in, attendance_source FROM attendance WHERE member_id = ? AND DATE(check_in) = ? LIMIT 1",
     [memberId, dateOnly]
   );
   if (existing.length > 0) {
-    return { id: existing[0].id, memberId, check_in: existing[0].check_in, alreadyMarked: true };
+    return {
+      id: existing[0].id,
+      memberId,
+      check_in: existing[0].check_in,
+      attendance_source: existing[0].attendance_source || source,
+      alreadyMarked: true
+    };
   }
 
   const [result] = await db.execute(
-    "INSERT INTO attendance (member_id, check_in, created_by) VALUES (?, ?, ?)",
-    [memberId, checkInStr, createdBy]
+    "INSERT INTO attendance (member_id, check_in, attendance_source, created_by) VALUES (?, ?, ?, ?)",
+    [memberId, checkInStr, source, createdBy]
   );
-  return { insertId: result.insertId, memberId, check_in: checkInStr };
+  return { insertId: result.insertId, memberId, check_in: checkInStr, attendance_source: source };
 };
 
 exports.getByMember = async (memberId) => {
@@ -70,7 +76,7 @@ exports.getByMember = async (memberId) => {
 exports.getAllRecords = async (user) => {
   // Return joined attendance with member/user name - all users can see all records
   const [rows] = await db.execute(
-    `SELECT a.id, a.member_id, a.check_in, m.name as user_name
+    `SELECT a.id, a.member_id, a.check_in, a.attendance_source, m.name as user_name
      FROM attendance a
      LEFT JOIN members m ON a.member_id = m.id
      ORDER BY a.check_in DESC LIMIT 200`

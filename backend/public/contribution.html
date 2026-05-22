@@ -58,6 +58,18 @@
     margin-bottom: 12px;
 }
 
+.payment-option.is-disabled {
+    opacity: 0.6;
+}
+
+.payment-option .status-note {
+    display: block;
+    min-height: 20px;
+    margin-top: 10px;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+}
+
 @media (max-width: 900px) {
     .contribution-grid {
         grid-template-columns: 1fr;
@@ -76,7 +88,7 @@
         <div>
             <span class="page-kicker">Contribution Details</span>
             <h1 id="contribTitle">Contributions</h1>
-            <p class="page-intro">Review approved account details, pay live through M-Pesa STK push or bank redirect, and track recorded contributions for this category.</p>
+            <p class="page-intro" id="contributionIntro">Review approved account details, pay live through M-Pesa STK push or bank redirect, and track recorded contributions for this category.</p>
         </div>
         <div class="header-actions">
             <button id="backBtn" class="btn btn-outline" onclick="window.location.href='donations.html'">&larr; Contribution Types</button>
@@ -109,7 +121,7 @@
     <section id="donateFormDiv" class="card hidden" style="margin-top:22px;">
         <h3>Make a Contribution</h3>
         <form id="donationForm">
-            <label for="member_name">Member Name</label>
+            <label for="member_name" id="memberNameLabel">Member Name</label>
             <input type="text" id="member_name" placeholder="Enter member name" required>
             <label for="amount">Amount</label>
             <input type="number" id="amount" min="1" step="0.01" placeholder="Enter amount" required>
@@ -119,15 +131,17 @@
             <input type="text" id="description" placeholder="Optional note">
 
             <div class="payment-methods">
-                <div class="payment-option">
+                <div class="payment-option" id="mpesaPaymentOption">
                     <h4>M-Pesa STK Push</h4>
                     <p class="muted">Send a live STK prompt to the donor's phone and record the payment when it completes.</p>
                     <button type="button" id="mpesaPayBtn" class="btn btn-secondary">Pay with M-Pesa</button>
+                    <small id="mpesaStatusNote" class="status-note"></small>
                 </div>
-                <div class="payment-option">
+                <div class="payment-option" id="bankPaymentOption">
                     <h4>Bank Redirect</h4>
                     <p class="muted">Redirect the donor to the configured bank or checkout provider to enter bank details and pay.</p>
                     <button type="button" id="bankPayBtn" class="btn btn-primary">Pay by Bank Redirect</button>
+                    <small id="bankStatusNote" class="status-note"></small>
                 </div>
             </div>
 
@@ -140,19 +154,19 @@
     </section>
 
     <section class="card" style="margin-top:22px;">
-        <h3>Members Who Have Contributed</h3>
+        <h3 id="historyHeading">Members Who Have Contributed</h3>
         <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Member</th>
+                        <th id="memberColumnHeader">Member</th>
                         <th>Amount</th>
                         <th>Method</th>
                         <th>Reference</th>
                         <th>Description</th>
                         <th>Date</th>
-                        <th>Actions</th>
+                        <th id="actionsColumnHeader">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="donationsTable"></tbody>

@@ -129,6 +129,34 @@ module.exports = (async () => {
     }
     await db.execute(`ALTER TABLE members MODIFY COLUMN department TEXT NULL`);
 
+    const [memberAttendanceCodeRows] = await db.execute(
+      `SELECT COUNT(*) as count
+       FROM INFORMATION_SCHEMA.COLUMNS
+       WHERE TABLE_SCHEMA = DATABASE()
+         AND TABLE_NAME = 'members'
+         AND COLUMN_NAME = 'attendance_code'`
+    );
+    if (!memberAttendanceCodeRows[0].count) {
+      await db.execute(`ALTER TABLE members ADD COLUMN attendance_code VARCHAR(64) NULL AFTER phone`);
+    }
+
+    const [memberAttendanceCodeIndexRows] = await db.execute(
+      `SELECT COUNT(*) as count
+       FROM INFORMATION_SCHEMA.STATISTICS
+       WHERE TABLE_SCHEMA = DATABASE()
+         AND TABLE_NAME = 'members'
+         AND INDEX_NAME = 'uniq_members_attendance_code'`
+    );
+    if (!memberAttendanceCodeIndexRows[0].count) {
+      await db.execute(`ALTER TABLE members ADD UNIQUE INDEX uniq_members_attendance_code (attendance_code)`);
+    }
+
+    await db.execute(`
+      UPDATE members
+      SET attendance_code = CONCAT('CHM-', LPAD(id, 6, '0'))
+      WHERE attendance_code IS NULL OR attendance_code = ''
+    `);
+
     // events
     await db.execute(`
       CREATE TABLE IF NOT EXISTS events (
@@ -199,12 +227,24 @@ module.exports = (async () => {
         member_id INT NOT NULL,
         check_in DATETIME,
         check_out DATETIME,
+        attendance_source VARCHAR(30) NOT NULL DEFAULT 'manual',
         created_by INT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
         FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
+
+    const [attendanceSourceRows] = await db.execute(
+      `SELECT COUNT(*) as count
+       FROM INFORMATION_SCHEMA.COLUMNS
+       WHERE TABLE_SCHEMA = DATABASE()
+         AND TABLE_NAME = 'attendance'
+         AND COLUMN_NAME = 'attendance_source'`
+    );
+    if (!attendanceSourceRows[0].count) {
+      await db.execute(`ALTER TABLE attendance ADD COLUMN attendance_source VARCHAR(30) NOT NULL DEFAULT 'manual' AFTER check_out`);
+    }
 
     // announcements
     await db.execute(`

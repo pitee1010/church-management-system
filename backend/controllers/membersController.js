@@ -21,6 +21,46 @@ exports.getMembers = async (req, res) => {
     }
 };
 
+exports.getMyMemberPass = async (req, res) => {
+    try {
+        if (!req.user || !req.user.name) {
+            return res.status(400).json({ error: "Unable to resolve the logged-in account" });
+        }
+
+        const accountName = String(req.user.name || "").trim();
+        if (!accountName) {
+            return res.status(400).json({ error: "Invalid account name" });
+        }
+
+        const members = await Member.findByName(accountName);
+        if (!members || !members.length) {
+            return res.json({
+                accountName,
+                member: null,
+                message: "No member profile matches this account name yet"
+            });
+        }
+
+        const [member] = [...members].sort((a, b) => Number(a.id) - Number(b.id));
+
+        res.json({
+            accountName,
+            multipleMatches: members.length > 1,
+            member: {
+                id: member.id,
+                name: member.name,
+                gender: member.gender || null,
+                phone: member.phone || "",
+                address: member.address || "",
+                departments: member.departments || [],
+                attendance_code: member.attendance_code || ""
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 // Delete member (admin or any authenticated user)
 exports.deleteMember = async (req, res) => {
     try {

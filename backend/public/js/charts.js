@@ -29,6 +29,8 @@ const DEFAULT_DEPARTMENTS = [
     "Decorators",
     "Kitchen",
     "Sunday School Teachers",
+    "Protocal",
+    "Evangelism",
 ];
 
 function pad2(n) {

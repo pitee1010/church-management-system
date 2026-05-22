@@ -24,7 +24,7 @@ Required env vars:
 - `MPESA_CONSUMER_SECRET` (for Daraja API)
 - `MPESA_SHORTCODE` (paybill/till shortcode)
 - `MPESA_PASSKEY` (Daraja STK passkey)
-- `MPESA_CALLBACK_URL` (public callback URL for STK push responses)
+- `MPESA_CALLBACK_URL` (optional explicit public callback URL for STK push responses; if omitted the app will use `APP_BASE_URL + /api/payments/mpesa/callback`)
 - `MPESA_TRANSACTION_TYPE` (optional, default: `CustomerPayBillOnline`)
 - `BANK_PAYMENT_REDIRECT_URL` (hosted bank/card checkout entry URL)
 - `BANK_PAYMENT_SUCCESS_URL` (optional explicit success return URL)
@@ -56,6 +56,20 @@ Notes
   - M-Pesa STK push through Safaricom Daraja when the M-Pesa environment variables are configured
   - provider-hosted bank redirect checkout when `BANK_PAYMENT_REDIRECT_URL` is configured
   - automatic recording of successful payments into church contributions
+
+M-Pesa setup
+1. Create a Safaricom Daraja app and collect:
+   - consumer key
+   - consumer secret
+   - shortcode
+   - passkey
+2. Set `MPESA_ENV=sandbox` while testing, then switch to `production` when Daraja live credentials are ready.
+3. Set `APP_BASE_URL` to your public app URL, for example `https://yourdomain.com`.
+4. Either:
+   - leave `MPESA_CALLBACK_URL` empty and let the app use `https://yourdomain.com/api/payments/mpesa/callback`
+   - or set `MPESA_CALLBACK_URL` explicitly if your callback is hosted on a different public URL
+5. Restart the server, open a contribution page, and confirm the M-Pesa payment card shows that it is ready.
+6. Use a Safaricom test number in sandbox, then confirm successful STK payments appear in contribution history automatically.
 
 Frontend
 - Start the backend server and open `http://localhost:<port>/` in a browser to access the app.

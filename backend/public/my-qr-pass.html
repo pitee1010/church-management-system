@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My QR Pass</title>
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/church-theme.css">
+<style>
+body {
+    font-family: "Manrope", "Segoe UI", sans-serif;
+}
+
+.page-shell {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 22px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 24px;
+}
+
+.page-grid {
+    display: grid;
+    grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+    gap: 22px;
+}
+
+.pass-card,
+.info-card {
+    border-radius: 30px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: var(--shadow);
+}
+
+.pass-card {
+    position: relative;
+    overflow: hidden;
+    padding: 28px;
+    background:
+        radial-gradient(circle at top right, rgba(15, 110, 207, 0.14), transparent 26%),
+        linear-gradient(180deg, #ffffff, #eef7ff);
+}
+
+.pass-card::after {
+    content: "";
+    position: absolute;
+    inset: auto -48px -56px auto;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(11, 154, 115, 0.14), transparent 70%);
+    pointer-events: none;
+}
+
+.eyebrow {
+    display: inline-flex;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.pass-title {
+    margin: 16px 0 10px;
+    font-size: clamp(2rem, 4vw, 2.6rem);
+    line-height: 1.02;
+}
+
+.pass-subtitle,
+.muted-copy {
+    color: var(--muted);
+}
+
+.pass-qr-shell {
+    margin-top: 22px;
+    padding: 20px;
+    border-radius: 24px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    text-align: center;
+}
+
+.pass-qr-shell img {
+    display: block;
+    width: min(100%, 280px);
+    margin: 0 auto 18px;
+    border-radius: 18px;
+    background: #ffffff;
+    border: 1px solid rgba(15, 110, 207, 0.08);
+}
+
+.code-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 12px 18px;
+    border-radius: 16px;
+    background: var(--secondary-soft);
+    color: var(--secondary-dark);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.info-card {
+    padding: 28px;
+}
+
+.detail-grid {
+    display: grid;
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.detail-item {
+    padding: 16px 18px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #ffffff, #f7fbff);
+    border: 1px solid var(--border);
+}
+
+.detail-item strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--primary-dark);
+}
+
+.status-card {
+    padding: 18px 20px;
+    border-radius: 22px;
+    margin-top: 18px;
+    background: #fff9eb;
+    color: #7a5a07;
+    border: 1px solid rgba(186, 145, 32, 0.2);
+}
+
+.status-card.hidden,
+.hidden {
+    display: none;
+}
+
+@media (max-width: 860px) {
+    .page-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+</style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#17376f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Church App">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+</head>
+<body class="church-theme">
+<div class="page page-shell">
+    <div class="topbar">
+        <button class="btn btn-primary" type="button" onclick="window.location.href='dashboard.html'">&larr; Back to Dashboard</button>
+        <div>
+            <h1 style="margin:0;">My QR Pass</h1>
+            <p class="muted-copy" style="margin:6px 0 0;">Keep your attendance QR and unique code ready whenever you arrive at church.</p>
+        </div>
+        <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
+    </div>
+
+    <div class="page-grid">
+        <section class="pass-card">
+            <span class="eyebrow">Quick Check-In Pass</span>
+            <h2 class="pass-title" id="memberName">Loading your pass...</h2>
+            <p class="pass-subtitle" id="passSubtitle">Your personal attendance QR is being prepared.</p>
+
+            <div class="pass-qr-shell">
+                <img id="qrImage" alt="Your attendance QR code" class="hidden">
+                <div id="qrUnavailable" class="muted-copy">Your QR code will appear here.</div>
+                <div class="code-badge" id="attendanceCode">No code available</div>
+                <div class="btn-row">
+                    <button id="copyCodeBtn" class="btn btn-secondary" type="button">Copy Code</button>
+                    <button id="downloadQrBtn" class="btn btn-primary" type="button">Download QR</button>
+                    <button id="openQrBtn" class="btn btn-secondary" type="button">Open QR</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="info-card">
+            <h2 style="margin:0;">Pass Details</h2>
+            <p class="muted-copy" style="margin:8px 0 0;">Use this page to quickly retrieve your church attendance pass whenever an usher asks for it.</p>
+
+            <div id="statusCard" class="status-card hidden"></div>
+
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <strong>Account Name</strong>
+                    <span id="accountName">-</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Member Name</strong>
+                    <span id="memberFullName">-</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Attendance Code</strong>
+                    <span id="memberAttendanceCode">-</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Departments</strong>
+                    <span id="memberDepartments">-</span>
+                </div>
+                <div class="detail-item">
+                    <strong>How to use it</strong>
+                    <span>Open this pass at the church entrance, then let the usher scan the QR or read the code if scanning is not available.</span>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script src="js/my-qr-pass.js"></script>
+<script src="js/pwa.js"></script>
+</body>
+</html>

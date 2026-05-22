@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worship | Ministry of Repentance and Holiness</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0a2e52;
+            --accent: #d4af37;
+            --bg: #030b14;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: white;
+        }
+
+        header {
+            padding: 1.5rem 5%;
+            background: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container { padding: 40px 5%; }
+
+        h2 { color: var(--accent); border-left: 4px solid var(--accent); padding-left: 15px; }
+
+        /* Video Section */
+        .video-highlight {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .main-player {
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--accent);
+        }
+
+        .video-list {
+            height: 450px;
+            overflow-y: auto;
+            background: var(--glass);
+            border-radius: 15px;
+            padding: 15px;
+        }
+
+        .video-item {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .video-item:hover { background: rgba(212, 175, 55, 0.2); }
+
+        /* Audio Section */
+        .audio-grid {
+            background: var(--glass);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .audio-row {
+            display: grid;
+            grid-template-columns: 50px 2fr 1fr 1fr;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .audio-row:hover { background: rgba(255,255,255,0.03); }
+
+        audio { height: 30px; filter: invert(100%); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="font-weight: 700; color: var(--accent);">Worship & Praise</div>
+    <a href="index.html" style="color: white; text-decoration: none;">← Home</a>
+</header>
+
+<div class="container">
+    <h2>Video Worship</h2>
+    <div class="video-highlight">
+        <div class="main-player">
+            <video id="worshipVideo" controls width="100%" poster="assets/603079446b193ee1864c93a1831dd86c.mp4">
+                <source src="assets/5a616d19fca5fd3b173e8cc062aad49b.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="video-list" id="videoPlaylist">
+            <!-- JS will inject items here -->
+        </div>
+    </div>
+
+    <h2>Audio Hymns</h2>
+    <div class="audio-grid" id="audioPlaylist">
+        <div class="audio-row" style="font-weight: 600; color: var(--accent);">
+            <span>#</span><span>Track Title</span><span>Artist</span><span>Listen</span>
+        </div>
+        <!-- JS will inject rows here -->
+    </div>
+</div>
+
+<script>
+    const videos = [
+        { title: "Mighty Miracle Worship", file: "assets/v1.mp4", thumb: "Pictures/img1.jpg" },
+        { title: "Repentance Worship Live", file: "assets/v2.mp4", thumb: "Pictures/img2.jpg" }
+    ];
+
+    const audios = [
+        { title: "Holy is the LORD", artist: "Ministry Choir", file: "assets/a1.mp3" },
+        { title: "The Blood of Jesus", artist: "Praise Team", file: "assets/a2.mp3" }
+    ];
+
+    // Load Videos
+    const vContainer = document.getElementById('videoPlaylist');
+    vContainer.innerHTML = videos.map((v, i) => `
+        <div class="video-item" onclick="playVideo('${v.file}')">
+            <img src="${v.thumb}" width="80" style="border-radius:5px">
+            <div>
+                <div style="font-size:0.9rem">${v.title}</div>
+                <small style="color:#888">Live Worship</small>
+            </div>
+        </div>
+    `).join('');
+
+    function playVideo(file) {
+        const player = document.getElementById('worshipVideo');
+        player.src = file;
+        player.play();
+    }
+
+    // Load Audios
+    const aContainer = document.getElementById('audioPlaylist');
+    audios.forEach((track, i) => {
+        const row = document.createElement('div');
+        row.className = 'audio-row';
+        row.innerHTML = `
+            <span>${i + 1}</span>
+            <span>${track.title}</span>
+            <span>${track.artist}</span>
+            <audio controls src="${track.file}"></audio>
+        `;
+        aContainer.appendChild(row);
+    });
+</script>
+</body>
+</html>

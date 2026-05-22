@@ -4,6 +4,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 
 // Support both specific and root endpoints for compatibility
 router.post('/mark', authMiddleware, attendanceController.markAttendance);
+router.post('/scan/qr', authMiddleware, attendanceController.scanQrAttendance);
 router.post('/', authMiddleware, attendanceController.markAttendance);
 
 router.get('/trends', authMiddleware, attendanceController.getAttendanceTrends);

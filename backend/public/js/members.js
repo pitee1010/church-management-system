@@ -24,8 +24,16 @@ const membersSubheading = document.getElementById("membersSubheading");
 const activeDepartmentBadge = document.getElementById("activeDepartmentBadge");
 const membersEmptyState = document.getElementById("membersEmptyState");
 const logoutBtn = document.getElementById("logoutBtn");
+const qrModal = document.getElementById("qrModal");
+const qrImage = document.getElementById("qrImage");
+const qrMemberName = document.getElementById("qrMemberName");
+const qrCodeValue = document.getElementById("qrCodeValue");
+const copyQrCodeBtn = document.getElementById("copyQrCodeBtn");
+const openQrImageBtn = document.getElementById("openQrImageBtn");
+const closeQrModalBtn = document.getElementById("closeQrModalBtn");
 let currentEditingMemberId = null;
 let allMembers = [];
+let currentQrMember = null;
 
 const MASTER_LABEL = "All Members";
 const UNASSIGNED_LABEL = "Unassigned";
@@ -37,8 +45,11 @@ const DEFAULT_DEPARTMENTS = [
     "Worshippers",
     "Security",
     "Decorators",
+    "Correspondents",
     "Kitchen",
     "Sunday School Teachers",
+    "Protocal",
+    "Evangelism",
 ];
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -69,6 +80,17 @@ function fileToDataUrl(file) {
         reader.onerror = reject;
         reader.readAsDataURL(file);
     });
+}
+
+function buildAttendanceQrValue(member) {
+    const code = String(member?.attendance_code || "").trim();
+    return code ? `CMS-ATTENDANCE:${code}` : "";
+}
+
+function buildQrImageUrl(member) {
+    const qrValue = buildAttendanceQrValue(member);
+    if (!qrValue) return "";
+    return `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(qrValue)}`;
 }
 
 function parseDepartments(value) {
@@ -164,12 +186,16 @@ function buildDepartmentList() {
 }
 
 function syncDepartmentDatalist() {
-    const departments = buildDepartmentList()
+    const allDepartments = buildDepartmentList();
+    const departments = allDepartments
         .filter((dept) => dept !== MASTER_LABEL && dept !== UNASSIGNED_LABEL);
 
     if (activeDepartment !== MASTER_LABEL && activeDepartment !== UNASSIGNED_LABEL && !departments.includes(activeDepartment)) {
         departments.push(activeDepartment);
     }
+
+    const filterDepartments = allDepartments
+        .filter((dept) => dept !== MASTER_LABEL);
 
     ["department", "edit_department"].forEach((selectId) => {
         const select = document.getElementById(selectId);
@@ -181,6 +207,15 @@ function syncDepartmentDatalist() {
             .join("");
         setDepartmentSelections(selectId, currentSelection);
     });
+
+    const filterSelect = document.getElementById("filterDepartment");
+    if (filterSelect) {
+        const previousValue = filterSelect.value;
+        filterSelect.innerHTML = "<option value=\"\">All departments</option>" + filterDepartments
+            .map((dept) => `<option value="${escapeHtml(dept)}">${escapeHtml(dept)}</option>`)
+            .join("");
+        if (previousValue) filterSelect.value = previousValue;
+    }
 }
 
 function syncDepartmentFormDefaults() {
@@ -255,10 +290,19 @@ function renderMembers() {
             <td>${escapeHtml(deptLabel)}</td>
             <td>${escapeHtml(member.phone || "")}</td>
             <td>${escapeHtml(member.address || "")}</td>
+            <td class="qr-cell"></td>
             <td class="actions-cell"></td>
         `;
 
+        const qrCell = tr.querySelector(".qr-cell");
         const actionsCell = tr.querySelector(".actions-cell");
+        const qrBtn = document.createElement("button");
+        qrBtn.className = "small-btn btn-secondary";
+        qrBtn.textContent = "Show QR";
+        qrBtn.disabled = !member.attendance_code;
+        qrBtn.addEventListener("click", () => openQrModal(member.id));
+        qrCell.appendChild(qrBtn);
+
         const editBtn = document.createElement("button");
         editBtn.className = "small-btn btn-primary";
         editBtn.textContent = "Edit";
@@ -305,6 +349,43 @@ function renderMembers() {
     }
 
     updatePageContext(filtered.length);
+}
+
+function openQrModal(memberId) {
+    const member = allMembers.find((item) => Number(item.id) === Number(memberId));
+    if (!member) {
+        alert("Member record not found");
+        return;
+    }
+
+    if (!member.attendance_code) {
+        alert("This member does not have an attendance code yet.");
+        return;
+    }
+
+    currentQrMember = member;
+    const qrValue = buildAttendanceQrValue(member);
+    const imageUrl = buildQrImageUrl(member);
+
+    if (qrMemberName) {
+        qrMemberName.textContent = `${member.name} can scan this QR when arriving at church.`;
+    }
+    if (qrCodeValue) {
+        qrCodeValue.textContent = member.attendance_code;
+    }
+    if (qrImage) {
+        qrImage.src = imageUrl;
+    }
+    if (qrModal) {
+        qrModal.style.display = "block";
+    }
+}
+
+function closeQrModal() {
+    if (qrModal) {
+        qrModal.style.display = "none";
+    }
+    currentQrMember = null;
 }
 
 async function fetchMembers() {
@@ -498,11 +579,37 @@ if (logoutBtn) {
     });
 }
 
+copyQrCodeBtn?.addEventListener("click", async () => {
+    if (!currentQrMember?.attendance_code) return;
+    try {
+        await navigator.clipboard.writeText(currentQrMember.attendance_code);
+        alert("Attendance code copied");
+    } catch (err) {
+        console.error(err);
+        alert("Unable to copy attendance code");
+    }
+});
+
+openQrImageBtn?.addEventListener("click", () => {
+    if (!currentQrMember) return;
+    const imageUrl = buildQrImageUrl(currentQrMember);
+    if (!imageUrl) return;
+    window.open(imageUrl, "_blank", "noopener,noreferrer");
+});
+
+closeQrModalBtn?.addEventListener("click", closeQrModal);
+
 fetchMembers().catch((err) => {
     console.error(err);
     alert("Failed to load members");
     if (membersEmptyState) {
         membersEmptyState.style.display = "block";
         membersEmptyState.textContent = "Unable to load members right now.";
+    }
+});
+
+window.addEventListener("click", (event) => {
+    if (event.target === qrModal) {
+        closeQrModal();
     }
 });

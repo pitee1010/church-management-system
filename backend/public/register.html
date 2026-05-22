@@ -4,18 +4,186 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Ministry of Repentance and Holiness</title>
-    <link rel="stylesheet" href="css/auth.css">
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0f6ecf">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Church App">
-<link rel="apple-touch-icon" href="assets/icon-192.png"></head>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#0a2e52">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    
+    <style>
+        /* --- CONSISTENT GLASSMORPHISM DESIGN --- */
+        :root {
+            --primary: #0a2e52;
+            --accent: #d4af37;
+            --glass: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --transition: all 0.3s ease;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(rgba(10, 46, 82, 0.85), rgba(10, 46, 82, 0.85)), 
+                        url('Pictures/bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        .auth-shell {
+            display: flex;
+            width: 1000px;
+            max-width: 95%;
+            height: 700px; /* Slightly taller for registration fields */
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        /* Left Side: Informational Hero */
+        .auth-hero {
+            flex: 1.2;
+            padding: 60px;
+            background: rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .auth-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            margin-bottom: 25px;
+            width: fit-content;
+        }
+
+        .cross-icon { 
+            font-size: 3rem; 
+            color: var(--accent); 
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+
+        .auth-title { font-size: 1.5rem; margin-bottom: 15px; line-height: 1.3; }
+        .auth-subtitle {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 35px;
+            opacity: 0.8;
+        }
+
+        .auth-list { list-style: none; }
+        .auth-list li { margin-bottom: 20px; font-size: 0.8rem; line-height: 1.5; }
+        .auth-list strong { 
+            color: var(--accent); 
+            display: block; 
+            font-size: 0.95rem; 
+            margin-bottom: 4px;
+        }
+
+        /* Right Side: Register Panel */
+        .auth-panel {
+            flex: 1;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .top { text-align: center; margin-bottom: 30px; }
+        .top h1 { font-size: 1.8rem; font-weight: 600; margin-top: 10px; }
+
+        form { display: flex; flex-direction: column; gap: 15px; }
+
+        input, select {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 18px;
+            border-radius: 12px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        /* Styling the Select dropdown options */
+        select option { background: #0a2e52; color: white; }
+
+        input:focus, select:focus { 
+            border-color: var(--accent); 
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        button {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        button:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4); 
+        }
+
+        .links { 
+            margin-top: 25px; 
+            display: flex; 
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+            font-size: 0.85rem; 
+        }
+        
+        .links a { 
+            color: var(--accent); 
+            text-decoration: none; 
+            opacity: 0.8;
+        }
+        
+        .links a:hover { opacity: 1; text-decoration: underline; }
+
+        #regError { color: #ff6b6b; font-size: 0.85rem; margin-top: 10px; text-align: center; }
+
+        /* Mobile Optimization */
+        @media (max-width: 900px) {
+            .auth-hero { display: none; }
+            .auth-shell { width: 450px; height: auto; padding-bottom: 40px; }
+        }
+    </style>
+</head>
 <body class="auth-page">
+
     <main class="auth-shell">
+        <!-- LEFT: Information Section -->
         <section class="auth-hero">
-            <span class="auth-badge">Create Account</span>
-            <div class="cross">✝</div>
+            <span class="auth-badge">CREATE ACCOUNT</span>
+            <div class="cross-icon">✝</div>
             <h1 class="auth-title">Start with a clean account setup and join the ministry portal.</h1>
             <p class="auth-subtitle">
                 Register once, then wait for approval if needed. The system will take you into the new lighter interface once your account is ready.
@@ -23,46 +191,49 @@
             <ul class="auth-list">
                 <li>
                     <strong>Member Access</strong>
-                    Normal users can reach giving, weekly programs, and their attendance report.
+                    Reach giving, weekly programs, and your personal attendance reports.
                 </li>
                 <li>
                     <strong>Team Access</strong>
-                    Users can help with ministry workflows across the platform.
+                    Help with ministry workflows and department structures across the platform.
                 </li>
                 <li>
-                    <strong>Faster First Impression</strong>
-                    The updated styling keeps forms clearer and easier to complete.
+                    <strong>Lighter Experience</strong>
+                    The updated styling keeps forms clearer and easier to complete on any device.
                 </li>
             </ul>
         </section>
 
+        <!-- RIGHT: Form Section -->
         <section class="auth-panel">
             <div class="top">
                 <span class="auth-badge">Register</span>
-                <div class="cross">✝</div>
-                <h1>Create your account</h1>
+                <h1>Create Account</h1>
             </div>
 
             <form id="registerForm">
                 <input type="text" id="regName" placeholder="Full Name" required>
                 <input type="tel" id="regPhone" placeholder="Phone Number" required>
                 <input type="password" id="regPassword" placeholder="Password" required>
+                
                 <select id="regRole" required>
+                    <option value="" disabled selected>Select Your Role</option>
                     <option value="normaluser">Normal User</option>
                     <option value="user">User</option>
                 </select>
-                <button type="submit">Register</button>
+
+                <button type="submit">Complete Registration</button>
                 <p id="regError"></p>
             </form>
 
             <div class="links">
-                <a href="index.html">Back to Welcome</a>
                 <a href="login.html">Already have an account? Login</a>
+                <a href="index.html">Back to Welcome</a>
             </div>
         </section>
     </main>
 
     <script src="js/main.js"></script>
-<script src="js/pwa.js"></script>
+    <script src="js/pwa.js"></script>
 </body>
 </html>

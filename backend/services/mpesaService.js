@@ -16,6 +16,20 @@ function timestamp() {
     return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
 }
 
+function normalizeBaseUrl(url) {
+    return String(url || "").trim().replace(/\/$/, "");
+}
+
+function callbackUrl(baseAppUrl = "") {
+    const explicit = normalizeBaseUrl(process.env.MPESA_CALLBACK_URL);
+    if (explicit) {
+        return explicit;
+    }
+
+    const base = normalizeBaseUrl(baseAppUrl || process.env.APP_BASE_URL);
+    return base ? `${base}/api/payments/mpesa/callback` : "";
+}
+
 function authHeader() {
     const key = process.env.MPESA_CONSUMER_KEY;
     const secret = process.env.MPESA_CONSUMER_SECRET;
@@ -41,13 +55,31 @@ async function getAccessToken() {
 }
 
 exports.isConfigured = () => {
-    return Boolean(
-        process.env.MPESA_CONSUMER_KEY &&
-        process.env.MPESA_CONSUMER_SECRET &&
-        process.env.MPESA_SHORTCODE &&
-        process.env.MPESA_PASSKEY &&
-        process.env.MPESA_CALLBACK_URL
-    );
+    return exports.getConfigStatus().enabled;
+};
+
+exports.getCallbackUrl = (baseAppUrl = "") => callbackUrl(baseAppUrl);
+
+exports.getConfigStatus = (baseAppUrl = "") => {
+    const missing = [];
+
+    if (!process.env.MPESA_CONSUMER_KEY) missing.push("MPESA_CONSUMER_KEY");
+    if (!process.env.MPESA_CONSUMER_SECRET) missing.push("MPESA_CONSUMER_SECRET");
+    if (!process.env.MPESA_SHORTCODE) missing.push("MPESA_SHORTCODE");
+    if (!process.env.MPESA_PASSKEY) missing.push("MPESA_PASSKEY");
+
+    const resolvedCallbackUrl = callbackUrl(baseAppUrl);
+    if (!resolvedCallbackUrl) {
+        missing.push("MPESA_CALLBACK_URL or APP_BASE_URL");
+    }
+
+    return {
+        enabled: missing.length === 0,
+        environment: envName(),
+        shortcode: process.env.MPESA_SHORTCODE || "",
+        callbackUrl: resolvedCallbackUrl,
+        missing
+    };
 };
 
 exports.normalizePhone = (phone) => {
@@ -66,13 +98,19 @@ exports.initiateStkPush = async ({
     amount,
     phoneNumber,
     accountReference,
-    description
+    description,
+    callbackUrl: callbackUrlOverride
 }) => {
     const accessToken = await getAccessToken();
     const ts = timestamp();
     const shortcode = process.env.MPESA_SHORTCODE;
     const passkey = process.env.MPESA_PASSKEY;
     const password = Buffer.from(`${shortcode}${passkey}${ts}`).toString("base64");
+    const resolvedCallbackUrl = callbackUrlOverride || callbackUrl();
+
+    if (!resolvedCallbackUrl) {
+        throw new Error("Missing M-Pesa callback URL");
+    }
 
     const res = await fetch(`${baseUrl()}/mpesa/stkpush/v1/processrequest`, {
         method: "POST",
@@ -89,7 +127,7 @@ exports.initiateStkPush = async ({
             PartyA: phoneNumber,
             PartyB: shortcode,
             PhoneNumber: phoneNumber,
-            CallBackURL: process.env.MPESA_CALLBACK_URL,
+            CallBackURL: resolvedCallbackUrl,
             AccountReference: accountReference,
             TransactionDesc: description || "Church contribution payment"
         })

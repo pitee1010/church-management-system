@@ -3,9 +3,20 @@ const Member = require('../models/memberModel');
 
 const ALLOWED_TYPES = new Set(['missions', 'tithes-offerings', 'tabernacle-construction', 'general']);
 
+function isOwnDonation(user, donation) {
+    if (!user || user.role === 'admin') return true;
+    const accountName = String(user.name || '').trim().toLowerCase();
+    const donorName = String(donation?.user_name || donation?.donor_name || '').trim().toLowerCase();
+    return Boolean(accountName) && accountName === donorName;
+}
+
 // Add donation
 exports.addDonation = async (req, res) => {
     try {
+        if (!req.user || req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Only admins can record manual contributions' });
+        }
+
         let { memberId, memberName, amount, date, description, contributionType } = req.body;
         
         // If memberName is provided, look up the member by name
@@ -125,6 +136,9 @@ exports.getDonationById = async (req, res) => {
         const id = req.params.id;
         const donation = await donationsModel.getById(id);
         if (!donation) return res.status(404).json({ error: 'Donation not found' });
+        if (!isOwnDonation(req.user, donation)) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
         res.json(donation);
     } catch (err) {
         res.status(500).json({ error: err.message });

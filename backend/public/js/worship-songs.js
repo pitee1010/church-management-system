@@ -33,6 +33,32 @@ const songsRoleNote = document.getElementById("songsRoleNote");
 let folderItems = [];
 let songItems = [];
 
+function buildFreshApiUrl(path, params = {}) {
+    const url = new URL(path, window.location.origin);
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+            url.searchParams.set(key, value);
+        }
+    });
+    url.searchParams.set("_ts", Date.now().toString());
+    return url.toString();
+}
+
+async function fetchFreshJson(path, params = {}) {
+    const res = await fetch(buildFreshApiUrl(path, params), {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Cache-Control": "no-cache"
+        },
+        cache: "no-store"
+    });
+    const data = await res.json().catch(() => ([]));
+    if (!res.ok) {
+        throw new Error(data.error || "Request failed");
+    }
+    return data;
+}
+
 if (canManageSongs && songManageCard) {
     songManageCard.style.display = "block";
 }
@@ -235,34 +261,21 @@ function renderSongsLibrary() {
 }
 
 async function loadFolders() {
-    const res = await fetch("/api/worship-songs/folders", {
-        headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await res.json().catch(() => ([]));
-    if (!res.ok) {
-        throw new Error(data.error || "Failed to load worship folders");
-    }
-
+    const data = await fetchFreshJson("/api/worship-songs/folders");
     folderItems = Array.isArray(data) ? data : [];
     renderFolderOptions(folderItems);
 }
 
 async function loadSongs() {
-    const res = await fetch("/api/worship-songs", {
-        headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await res.json().catch(() => ([]));
-    if (!res.ok) {
-        throw new Error(data.error || "Failed to load worship songs");
-    }
-
+    const data = await fetchFreshJson("/api/worship-songs", { include_file_data: 0 });
     songItems = Array.isArray(data) ? data : [];
 }
 
 async function loadLibrary() {
+    let songsLoadFailed = false;
+
     try {
-        await Promise.all([loadFolders(), loadSongs()]);
-        renderSongsLibrary();
+        await loadFolders();
     } catch (err) {
         console.error(err);
         if (songsEmptyState) {
@@ -270,6 +283,22 @@ async function loadLibrary() {
             songsEmptyState.style.display = "block";
             songsEmptyState.textContent = "Unable to load worship folders right now.";
         }
+        return;
+    }
+
+    try {
+        await loadSongs();
+    } catch (err) {
+        console.error(err);
+        songsLoadFailed = true;
+        songItems = [];
+    }
+
+    renderSongsLibrary();
+
+    if (songsLoadFailed && songsEmptyState && folderItems.length) {
+        songsEmptyState.style.display = "block";
+        songsEmptyState.textContent = "Folders are available, but song previews could not be refreshed right now.";
     }
 }
 

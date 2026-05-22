@@ -11,11 +11,21 @@ const mpesaPayBtn = document.getElementById("mpesaPayBtn");
 const bankPayBtn = document.getElementById("bankPayBtn");
 const manualRecordBtn = document.getElementById("manualRecordBtn");
 const paymentStatusPanel = document.getElementById("paymentStatusPanel");
+const mpesaStatusNote = document.getElementById("mpesaStatusNote");
+const bankStatusNote = document.getElementById("bankStatusNote");
+const mpesaPaymentOption = document.getElementById("mpesaPaymentOption");
+const bankPaymentOption = document.getElementById("bankPaymentOption");
+const historyHeading = document.getElementById("historyHeading");
+const memberColumnHeader = document.getElementById("memberColumnHeader");
+const actionsColumnHeader = document.getElementById("actionsColumnHeader");
+const contributionIntro = document.getElementById("contributionIntro");
+const memberNameLabel = document.getElementById("memberNameLabel");
 
 if (!token) window.location.href = "index.html";
 
 const payload = token ? JSON.parse(atob(token.split(".")[1])) : null;
 const role = payload ? payload.role : null;
+const isAdmin = role === "admin";
 
 const params = new URLSearchParams(window.location.search);
 const contributionType = params.get("type");
@@ -43,8 +53,8 @@ const TYPE_META = {
         title: "Tabernacle Construction Contributions",
         bank: "Builders Trust Bank",
         accountName: "Ministry of Repentance and Holiness - Tabernacle Construction",
-        accountNumber: "1002003003",
-        paybill: "821003",
+        accountNumber: "1330496248",
+        paybill: "522522",
         reference: "TABERNACLE"
     }
 };
@@ -55,6 +65,7 @@ if (!TYPE_META[contributionType]) {
 }
 
 let paymentPollTimer = null;
+let paymentConfig = null;
 
 function setupTypeDetails() {
     const meta = TYPE_META[contributionType];
@@ -70,8 +81,72 @@ function setupTypeDetails() {
         memberNameField.value = payload.name;
     }
 
-    if (manualRecordBtn && role !== "admin") {
+    if (!isAdmin) {
+        if (historyHeading) {
+            historyHeading.textContent = "Your Contribution History";
+        }
+        if (contributionIntro) {
+            contributionIntro.textContent = "Review approved account details, pay live through M-Pesa STK push or bank redirect, and track your contribution history for this category.";
+        }
+        if (memberNameLabel) {
+            memberNameLabel.textContent = "Your Member Name";
+        }
+        if (memberNameField) {
+            memberNameField.readOnly = true;
+        }
+        if (memberColumnHeader) {
+            memberColumnHeader.style.display = "none";
+        }
+        if (actionsColumnHeader) {
+            actionsColumnHeader.style.display = "none";
+        }
+    }
+
+    if (manualRecordBtn && !isAdmin) {
         manualRecordBtn.style.display = "none";
+    }
+}
+
+function setMethodAvailability(button, noteEl, enabled, message, optionCard) {
+    if (button) {
+        button.disabled = !enabled;
+    }
+    if (noteEl) {
+        noteEl.textContent = message || "";
+    }
+    if (optionCard) {
+        optionCard.classList.toggle("is-disabled", !enabled);
+    }
+}
+
+async function fetchPaymentConfig() {
+    try {
+        const res = await fetch("/api/payments/config", {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data.error || "Failed to load payment configuration");
+        }
+
+        paymentConfig = data;
+
+        const mpesaEnabled = Boolean(data?.mpesa?.enabled);
+        const mpesaMessage = mpesaEnabled
+            ? `M-Pesa is ready in ${String(data.mpesa.environment || "sandbox").toUpperCase()} mode.`
+            : `M-Pesa is unavailable until the server is configured: ${(data?.mpesa?.missing || []).join(", ")}`;
+        setMethodAvailability(mpesaPayBtn, mpesaStatusNote, mpesaEnabled, mpesaMessage, mpesaPaymentOption);
+
+        const bankEnabled = Boolean(data?.bankRedirect?.enabled);
+        const bankMessage = bankEnabled
+            ? "Bank redirect is available."
+            : "Bank redirect is not configured on the server.";
+        setMethodAvailability(bankPayBtn, bankStatusNote, bankEnabled, bankMessage, bankPaymentOption);
+    } catch (err) {
+        console.error(err);
+        paymentConfig = null;
+        setMethodAvailability(mpesaPayBtn, mpesaStatusNote, false, "Could not verify M-Pesa configuration.", mpesaPaymentOption);
+        setMethodAvailability(bankPayBtn, bankStatusNote, false, "Could not verify bank redirect configuration.", bankPaymentOption);
     }
 }
 
@@ -90,34 +165,52 @@ function clearPaymentPolling() {
 }
 
 async function fetchContributions() {
-    const res = await fetch(`/api/donations?type=${encodeURIComponent(contributionType)}`, {
-        headers: { "Authorization": `Bearer ${token}` }
-    });
-    const data = await res.json();
-    let total = 0;
-    donationsTable.innerHTML = "";
+    try {
+        const res = await fetch(`/api/donations?type=${encodeURIComponent(contributionType)}`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data.error || "Failed to load contributions");
+        }
 
-    data.forEach((d) => {
-        const amountNum = Number(d.amount) || 0;
-        total += amountNum;
-        const tr = document.createElement("tr");
-        const actions = (role === "admin")
-            ? `<button class="small-btn btn-primary" onclick="editContribution(${d.id})">Edit</button> <button class="small-btn btn-danger" onclick="deleteContribution(${d.id})">Delete</button>`
-            : '<span class="cell-muted">-</span>';
-        tr.innerHTML = `
-            <td>${d.id}</td>
-            <td>${d.user_name || d.donor_name || ""}</td>
-            <td>KSH ${amountNum.toLocaleString()}</td>
-            <td>${d.payment_method || "manual"}</td>
-            <td>${d.payment_reference || "-"}</td>
-            <td>${d.description || ""}</td>
-            <td>${d.date || ""}</td>
-            <td>${actions}</td>
-        `;
-        donationsTable.appendChild(tr);
-    });
+        let total = 0;
+        donationsTable.innerHTML = "";
 
-    totalContributedEl.textContent = `KSH ${total.toLocaleString()}`;
+        data.forEach((d) => {
+            const amountNum = Number(d.amount) || 0;
+            total += amountNum;
+            const tr = document.createElement("tr");
+            const cells = [
+                `<td>${d.id}</td>`
+            ];
+
+            if (isAdmin) {
+                cells.push(`<td>${d.user_name || d.donor_name || ""}</td>`);
+            }
+
+            cells.push(
+                `<td>KSH ${amountNum.toLocaleString()}</td>`,
+                `<td>${d.payment_method || "manual"}</td>`,
+                `<td>${d.payment_reference || "-"}</td>`,
+                `<td>${d.description || ""}</td>`,
+                `<td>${d.date || ""}</td>`
+            );
+
+            if (isAdmin) {
+                cells.push(`<td><button class="small-btn btn-primary" onclick="editContribution(${d.id})">Edit</button> <button class="small-btn btn-danger" onclick="deleteContribution(${d.id})">Delete</button></td>`);
+            }
+
+            tr.innerHTML = cells.join("");
+            donationsTable.appendChild(tr);
+        });
+
+        totalContributedEl.textContent = `KSH ${total.toLocaleString()}`;
+    } catch (err) {
+        console.error(err);
+        donationsTable.innerHTML = `<tr><td colspan="${isAdmin ? 8 : 6}">Failed to load contributions.</td></tr>`;
+        totalContributedEl.textContent = "KSH 0";
+    }
 }
 
 function getContributionPayload() {
@@ -187,6 +280,10 @@ async function startPaymentStatusPolling(paymentId) {
 
 async function initiateMpesaPayment() {
     try {
+        if (paymentConfig && !paymentConfig?.mpesa?.enabled) {
+            throw new Error(mpesaStatusNote?.textContent || "M-Pesa is not configured on the server");
+        }
+
         const payloadData = getContributionPayload();
         if (!payloadData.phone) {
             throw new Error("Please enter the M-Pesa phone number for STK push");
@@ -218,6 +315,10 @@ async function initiateMpesaPayment() {
 
 async function initiateBankRedirect() {
     try {
+        if (paymentConfig && !paymentConfig?.bankRedirect?.enabled) {
+            throw new Error(bankStatusNote?.textContent || "Bank redirect is not configured on the server");
+        }
+
         const payloadData = getContributionPayload();
         showPaymentStatus("Preparing bank redirect...");
         const res = await fetch("/api/payments/bank/redirect", {
@@ -336,6 +437,7 @@ logoutBtn?.addEventListener("click", () => {
 });
 
 setupTypeDetails();
+fetchPaymentConfig();
 fetchContributions();
 
 if (paymentIdFromUrl) {

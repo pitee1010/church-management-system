@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sermons | Ministry of Repentance and Holiness</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0a2e52;
+            --accent-gold: #d4af37;
+            --bg-dark: #05162a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-dark);
+            color: white;
+            line-height: 1.6;
+        }
+
+        /* --- Header Styling (Consistent with Index) --- */
+        header {
+            background: rgba(10, 46, 82, 0.95);
+            padding: 1rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            text-decoration: none;
+        }
+
+        .back-link {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            border: 1px solid var(--accent-gold);
+            padding: 5px 15px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            background: var(--accent-gold);
+            color: black;
+        }
+
+        /* --- Featured Sermon --- */
+        .featured-sermon {
+            padding: 40px 5%;
+            background: linear-gradient(to bottom, var(--primary-blue), var(--bg-dark));
+            text-align: center;
+        }
+
+        .main-video-container {
+            max-width: 900px;
+            margin: 0 auto 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            border: 2px solid var(--accent-gold);
+        }
+
+        video { width: 100%; display: block; }
+
+        .featured-info h1 {
+            color: var(--accent-gold);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        /* --- Search & Filter --- */
+        .controls {
+            padding: 20px 5%;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-bar {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            width: 300px;
+            background: var(--card-bg);
+            color: white;
+            outline: 1px solid var(--accent-gold);
+        }
+
+        .filter-btn {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--accent-gold);
+            color: black;
+            border-color: var(--accent-gold);
+        }
+
+        /* --- Sermon Grid --- */
+        .sermon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 40px 5%;
+        }
+
+        .sermon-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: var(--transition);
+            border-bottom: 3px solid transparent;
+        }
+
+        .sermon-card:hover {
+            transform: translateY(-10px);
+            border-bottom: 3px solid var(--accent-gold);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .thumbnail-placeholder {
+            width: 100%;
+            height: 180px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .play-icon {
+            font-size: 3rem;
+            color: var(--accent-gold);
+            opacity: 0.8;
+        }
+
+        .card-content { padding: 20px; }
+        .card-content h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: var(--accent-gold); }
+        .card-content p { font-size: 0.85rem; color: #ccc; margin-bottom: 15px; }
+        
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #888;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.8rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">Repentance & Holiness</a>
+        <a href="index.html" class="back-link">← Back to Home</a>
+    </header>
+
+    <section class="featured-sermon">
+        <div class="main-video-container">
+            <video controls poster="assets/5a616d19fca5fd3b173e8cc062aad49b.mp4">
+                <source src="assets/603079446b193ee1864c93a1831dd86c.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="featured-info">
+            <h1>Latest Global Prophetic Instruction</h1>
+            <p>Live from the Throne of the LORD - A message for the nations.</p>
+        </div>
+    </section>
+
+    <div class="controls">
+        <input type="text" class="search-bar" placeholder="Search sermons...">
+        <button class="filter-btn active">All</button>
+        <button class="filter-btn">Prophecy</button>
+        <button class="filter-btn">Healing</button>
+        <button class="filter-btn">Repentance</button>
+    </div>
+
+    <main class="sermon-grid">
+        
+        <div class="sermon-card">
+            <div class="thumbnail-placeholder">
+                <span class="play-icon">▶</span>
+                </div>
+            <div class="card-content">
+                <h3>The Coming of the Messiah</h3>
+                <p>An urgent call for the church to prepare the way in absolute holiness.</p>
+                <div class="meta">
+                    <span>March 2026</span>
+                    <span>45:20 mins</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sermon-card">
+            <div class="thumbnail-placeholder">
+                <span class="play-icon">▶</span>
+            </div>
+            <div class="card-content">
+                <h3>The Altar of the LORD</h3>
+                <p>Restoring the purity of the worship and the fear of God in the sanctuary.</p>
+                <div class="meta">
+                    <span>February 2026</span>
+                    <span>38:15 mins</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sermon-card">
+            <div class="thumbnail-placeholder">
+                <span class="play-icon">▶</span>
+            </div>
+            <div class="card-content">
+                <h3>Healing at the Altar</h3>
+                <p>Documented miracles and the power of the blood of Jesus Christ.</p>
+                <div class="meta">
+                    <span>January 2026</span>
+                    <span>52:00 mins</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sermon-card">
+            <div class="thumbnail-placeholder">
+                <span class="play-icon">▶</span>
+            </div>
+            <div class="card-content">
+                <h3>Walking in Righteousness</h3>
+                <p>Practical steps to living a holy life in a compromised world.</p>
+                <div class="meta">
+                    <span>December 2025</span>
+                    <span>30:45 mins</span>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>© 2026 Ministry of Repentance and Holiness. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery | Ministry of Repentance and Holiness</title>
+    <style>
+        body { margin: 0; font-family: sans-serif; background: #050505; color: white; }
+        
+        .gallery-nav {
+            padding: 30px;
+            text-align: center;
+            background: #0a2e52;
+        }
+
+        .filter-tabs { margin-top: 20px; }
+        .tab {
+            padding: 10px 25px;
+            margin: 5px;
+            background: transparent;
+            color: #d4af37;
+            border: 1px solid #d4af37;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .tab.active { background: #d4af37; color: black; }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-auto-rows: 200px;
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .gallery-item img, .gallery-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .gallery-item:hover img { transform: scale(1.1); }
+        
+        /* Large items for masonry effect */
+        .tall { grid-row: span 2; }
+        .wide { grid-column: span 2; }
+
+        .badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="gallery-nav">
+    <h1>Ministry Gallery</h1>
+    <div class="filter-tabs">
+        <button class="tab active" onclick="filterGallery('all')">All</button>
+        <button class="tab" onclick="filterGallery('image')">Photos</button>
+        <button class="tab" onclick="filterGallery('video')">Videos</button>
+    </div>
+</div>
+
+<div class="gallery-grid" id="galleryGrid">
+    <!-- JS will populate -->
+</div>
+
+<script>
+    const items = [
+        { type: 'image', src: 'Assets/', class: 'wide' },
+        { type: 'video', src: 'assets/2026-03-07 10-12-00.mp4', class: '' },
+        { type: 'image', src: 'Pictures/img2.jpg', class: 'tall' },
+        { type: 'image', src: 'Pictures/img3.jpg', class: '' },
+        { type: 'video', src: 'assets/2026-03-08 13-18-11.mp4', class: 'wide' },
+        { type: 'image', src: 'Pictures/img4.jpg', class: '' }
+    ];
+
+    function loadGallery(filter = 'all') {
+        const grid = document.getElementById('galleryGrid');
+        grid.innerHTML = '';
+
+        const filtered = filter === 'all' ? items : items.filter(i => i.type === filter);
+
+        filtered.forEach(item => {
+            const div = document.createElement('div');
+            div.className = `gallery-item ${item.class}`;
+            
+            if(item.type === 'image') {
+                div.innerHTML = `<img src="${item.src}"><span class="badge">IMAGE</span>`;
+            } else {
+                div.innerHTML = `
+                    <video muted onmouseover="this.play()" onmouseout="this.pause();this.currentTime=0">
+                        <source src="${item.src}">
+                    </video>
+                    <span class="badge">VIDEO</span>`;
+            }
+            grid.appendChild(div);
+        });
+    }
+
+    function filterGallery(type) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        loadGallery(type);
+    }
+
+    loadGallery();
+</script>
+</body>
+</html>

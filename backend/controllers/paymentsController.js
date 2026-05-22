@@ -26,6 +26,17 @@ function appBaseUrl(req) {
     return host ? `${protocol}://${host}` : "";
 }
 
+function paymentConfigResponse(req) {
+    const base = appBaseUrl(req);
+    const mpesa = mpesaService.getConfigStatus(base);
+    return {
+        mpesa,
+        bankRedirect: {
+            enabled: Boolean(getBankRedirectBaseUrl())
+        }
+    };
+}
+
 function buildBankRedirectUrl(req, { paymentId, amount, contributionType, memberName }) {
     const base = getBankRedirectBaseUrl();
     if (!base) return null;
@@ -51,6 +62,19 @@ async function resolveMember(memberId, memberName) {
         member = await Member.getById(memberId);
     }
     return member;
+}
+
+async function resolveMemberForRequest(req, memberId, memberName) {
+    if (req.user?.role === "admin") {
+        return resolveMember(memberId, memberName);
+    }
+
+    const accountName = String(req.user?.name || "").trim();
+    if (!accountName) {
+        return null;
+    }
+
+    return resolveMember(null, accountName);
 }
 
 exports.getPaymentStatus = async (req, res) => {
@@ -82,14 +106,25 @@ exports.getPaymentStatus = async (req, res) => {
     }
 };
 
+exports.getPaymentConfig = async (req, res) => {
+    try {
+        res.json(paymentConfigResponse(req));
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 exports.initiateMpesaStk = async (req, res) => {
     try {
         const { memberId, memberName, amount, description, contributionType, phone } = req.body;
-        if (!mpesaService.isConfigured()) {
-            return res.status(501).json({ error: "M-Pesa is not configured yet. Add M-Pesa credentials in the server environment first." });
+        const mpesaConfig = mpesaService.getConfigStatus(appBaseUrl(req));
+        if (!mpesaConfig.enabled) {
+            return res.status(501).json({
+                error: `M-Pesa is not configured yet. Missing: ${mpesaConfig.missing.join(", ")}`
+            });
         }
 
-        const member = await resolveMember(memberId, memberName);
+        const member = await resolveMemberForRequest(req, memberId, memberName);
         if (!member) return res.status(404).json({ error: "Member not found" });
 
         const amountNum = Number(amount);
@@ -126,7 +161,8 @@ exports.initiateMpesaStk = async (req, res) => {
                 amount: amountNum,
                 phoneNumber,
                 accountReference: externalReference,
-                description: description || `${buildContributionReference(type)} contribution`
+                description: description || `${buildContributionReference(type)} contribution`,
+                callbackUrl: mpesaConfig.callbackUrl
             });
 
             await paymentsModel.updatePayment(paymentId, {
@@ -158,7 +194,7 @@ exports.initiateMpesaStk = async (req, res) => {
 exports.initiateBankRedirect = async (req, res) => {
     try {
         const { memberId, memberName, amount, description, contributionType } = req.body;
-        const member = await resolveMember(memberId, memberName);
+        const member = await resolveMemberForRequest(req, memberId, memberName);
         if (!member) return res.status(404).json({ error: "Member not found" });
 
         const amountNum = Number(amount);

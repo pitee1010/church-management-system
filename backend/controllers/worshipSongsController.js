@@ -3,6 +3,13 @@ const db = require("../utils/db");
 const MANAGER_ROLES = new Set(["admin", "user"]);
 const ADMIN_ROLES = new Set(["admin"]);
 
+function setNoStoreHeaders(res) {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    res.setHeader("Vary", "Authorization");
+}
+
 function isValidDataUrl(value, allowedPrefix) {
     const raw = String(value || "").trim();
     return raw.startsWith(`data:${allowedPrefix}`);
@@ -29,6 +36,7 @@ function buildFolderName(serviceDate) {
 
 exports.getFolders = async (req, res) => {
     try {
+        setNoStoreHeaders(res);
         const [rows] = await db.execute(
             `SELECT id, folder_name, service_date, created_at
              FROM worship_song_folders
@@ -42,6 +50,7 @@ exports.getFolders = async (req, res) => {
 
 exports.getFolderById = async (req, res) => {
     try {
+        setNoStoreHeaders(res);
         const id = Number(req.params.id);
         if (!id) {
             return res.status(400).json({ error: "Invalid folder id" });
@@ -106,8 +115,10 @@ exports.createFolder = async (req, res) => {
 
 exports.getSongs = async (req, res) => {
     try {
+        setNoStoreHeaders(res);
         const folderId = Number(req.query?.folder_id);
         const hasFolderFilter = Number.isInteger(folderId) && folderId > 0;
+        const includeFileData = String(req.query?.include_file_data || "").trim() === "1";
         const [rows] = await db.execute(
             `SELECT
                 ws.id,
@@ -116,7 +127,7 @@ exports.getSongs = async (req, res) => {
                 ws.description,
                 ws.folder_id,
                 ws.file_name,
-                ws.file_data,
+                ${includeFileData ? "ws.file_data" : "NULL AS file_data"},
                 ws.mime_type,
                 ws.created_at,
                 wf.folder_name,

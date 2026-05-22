@@ -3,7 +3,7 @@
 :root {
     --auth-blue: #0f6ecf;
     --auth-blue-dark: #0a57a4;
-    --auth-blue-soft: #eaf4ff;
+    --auth-blue-soft: #f4eaff;
     --auth-green: #0b9a73;
     --auth-green-dark: #077b5b;
     --auth-green-soft: #e9fff8;
@@ -25,7 +25,7 @@ body.auth-page {
     font-family: "Manrope", "Segoe UI", sans-serif;
     color: var(--auth-text);
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.94)),
+        linear-gradient(180deg, #492a02d6, rgba(22, 50, 110, 0.94)),
         radial-gradient(circle at 10% 16%, rgba(15, 110, 207, 0.12), transparent 26%),
         radial-gradient(circle at 90% 12%, rgba(11, 154, 115, 0.1), transparent 20%),
         linear-gradient(180deg, #f9fbff, var(--auth-bg));

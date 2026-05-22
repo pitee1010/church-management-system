@@ -14,6 +14,8 @@ const DEFAULT_DEPARTMENTS = [
     "Decorators",
     "Kitchen",
     "Sunday School Teachers",
+    "Protocal",
+    "Evangelism",
 ];
 
 if (!token) {

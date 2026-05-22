@@ -1,13 +1,15 @@
-const CACHE_NAME = "church-app-v6";
+const CACHE_NAME = "church-app-v9";
 const APP_SHELL = [
   "/",
   "/index.html",
   "/login.html",
   "/register.html",
   "/dashboard.html",
+  "/my-qr-pass.html",
   "/departments.html",
   "/members.html",
   "/attendance.html",
+  "/qr-attendance.html",
   "/graphs.html",
   "/events.html",
   "/announcements.html",
@@ -19,6 +21,9 @@ const APP_SHELL = [
   "/css/styles.css",
   "/css/church-theme.css",
   "/js/pwa.js",
+  "/js/my-qr-pass.js",
+  "/js/qr-attendance.js",
+  "/js/members.js",
   "/js/worship-songs.js",
   "/js/worship-songs-folder.js",
   "/js/church-album.js",

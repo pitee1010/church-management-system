@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Attendance</title>
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/church-theme.css">
+<style>
+.page {
+    max-width: 1180px;
+}
+
+.qr-attendance-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+    gap: 22px;
+}
+
+.scanner-stage,
+.scanner-sidebar {
+    display: grid;
+    gap: 18px;
+}
+
+.scanner-video-shell {
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px;
+    background: #09111f;
+    min-height: 340px;
+    border: 1px solid var(--border);
+}
+
+.scanner-video {
+    width: 100%;
+    height: 100%;
+    min-height: 340px;
+    object-fit: cover;
+    display: block;
+}
+
+.scanner-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: grid;
+    place-items: center;
+}
+
+.scanner-frame {
+    width: min(280px, 72%);
+    aspect-ratio: 1;
+    border: 3px solid rgba(255,255,255,0.9);
+    border-radius: 22px;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.28);
+}
+
+.scanner-actions,
+.manual-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.scan-status {
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.scan-status.success {
+    background: rgba(11, 154, 115, 0.12);
+    color: #0a6d51;
+}
+
+.scan-status.error {
+    background: rgba(211, 47, 47, 0.12);
+    color: #a52323;
+}
+
+.recent-scan-list {
+    display: grid;
+    gap: 10px;
+}
+
+.recent-scan-item {
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: #fff;
+}
+
+.recent-scan-item strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+@media (max-width: 920px) {
+    .qr-attendance-layout {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#17376f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Church App">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+</head>
+<body class="church-theme">
+<div class="page">
+    <div class="page-header">
+        <div>
+            <span class="page-kicker">Quick Attendance</span>
+            <h1>QR Attendance Scanner</h1>
+            <p class="page-intro">Scan member QR codes at the church entrance so attendance is captured faster during bulk check-in.</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-outline" onclick="window.location.href='attendance.html'">&larr; Back to Attendance</button>
+            <button id="logoutBtn" class="btn btn-danger">Logout</button>
+        </div>
+    </div>
+
+    <div class="qr-attendance-layout">
+        <section class="card scanner-stage">
+            <div>
+                <h3>Live Camera Scanner</h3>
+                <p class="muted">Open the camera, point it at a member QR card, and the system will mark attendance instantly.</p>
+            </div>
+
+            <div class="scanner-video-shell">
+                <video id="scannerVideo" class="scanner-video" autoplay muted playsinline></video>
+                <div class="scanner-overlay">
+                    <div class="scanner-frame"></div>
+                </div>
+            </div>
+
+            <div class="scanner-actions">
+                <button id="startScannerBtn" type="button" class="btn btn-primary">Start Camera Scanner</button>
+                <button id="stopScannerBtn" type="button" class="btn btn-outline">Stop Camera</button>
+            </div>
+
+            <div id="scanStatus" class="scan-status">Scanner idle. Start the camera or use manual code entry.</div>
+        </section>
+
+        <aside class="scanner-sidebar">
+            <section class="card">
+                <h3>Manual QR Code Entry</h3>
+                <p class="muted">Use this fallback if the device camera is unavailable or the member only has the attendance code text.</p>
+                <form id="manualQrForm">
+                    <label for="manualQrInput">Attendance Code or QR Value</label>
+                    <input id="manualQrInput" type="text" placeholder="Example: CHM-000001" required>
+                    <div class="manual-actions" style="margin-top:12px;">
+                        <button type="submit" class="btn btn-secondary">Mark Attendance</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="card">
+                <h3>Recent Scan Activity</h3>
+                <div id="recentScanList" class="recent-scan-list">
+                    <div class="recent-scan-item">
+                        <strong>No scans yet</strong>
+                        <span class="muted">Scanned members will appear here during this session.</span>
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</div>
+
+<script src="js/qr-attendance.js"></script>
+<script src="js/pwa.js"></script>
+</body>
+</html>

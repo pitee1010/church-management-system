@@ -68,6 +68,8 @@
 
 .table-wrapper {
     overflow-x: auto;
+    max-height: 470px;
+    overflow-y: auto;
 }
 
 table {
@@ -164,6 +166,46 @@ tr:hover {
     padding: 20px;
     color: var(--muted);
 }
+
+.qr-modal-body {
+    display: grid;
+    gap: 16px;
+}
+
+.qr-preview-card {
+    display: grid;
+    gap: 12px;
+    justify-items: center;
+    padding: 20px;
+    border-radius: 18px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.qr-preview-card img {
+    width: 220px;
+    height: 220px;
+    max-width: 100%;
+    border-radius: 16px;
+    background: #fff;
+    border: 1px solid var(--border);
+}
+
+.qr-code-pill {
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(23, 55, 111, 0.08);
+    color: var(--primary-dark);
+    font-weight: 700;
+    word-break: break-all;
+    text-align: center;
+}
+
+.qr-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#17376f">
@@ -187,6 +229,18 @@ tr:hover {
         <div>
             <span id="activeDepartmentBadge" class="context-badge">All Members</span>
         </div>
+    </div>
+
+    <div class="card">
+        <h3>Search & Filter Members</h3>
+        <form id="memberFilterForm" class="form-grid">
+            <input type="text" id="filterName" placeholder="Search by name" />
+            <select id="filterDepartment">
+                <option value="">All departments</option>
+            </select>
+            <input type="text" id="filterAddress" placeholder="Search by address" />
+            <button type="button" id="clearFiltersBtn" class="btn btn-secondary">Clear filters</button>
+        </form>
     </div>
 
     <div class="card">
@@ -224,6 +278,7 @@ tr:hover {
                         <th>Departments</th>
                         <th>Phone</th>
                         <th>Address</th>
+                        <th>QR</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -257,6 +312,25 @@ tr:hover {
             <button type="submit" class="btn btn-secondary">Save</button>
             <button type="button" class="btn btn-danger" onclick="closeEditModal()">Cancel</button>
         </form>
+    </div>
+</div>
+
+<div id="qrModal" class="modal">
+    <div class="modal-content">
+        <h2>Member Attendance QR</h2>
+        <div class="qr-modal-body">
+            <p id="qrMemberName" class="muted">Generate and scan this QR to mark attendance quickly.</p>
+            <div class="qr-preview-card">
+                <img id="qrImage" alt="Member attendance QR code" />
+                <div id="qrCodeValue" class="qr-code-pill"></div>
+            </div>
+            <p class="muted">If the QR image does not load, ushers can still use the attendance code shown above in the QR scanner page.</p>
+            <div class="qr-actions">
+                <button type="button" id="copyQrCodeBtn" class="btn btn-primary">Copy Code</button>
+                <button type="button" id="openQrImageBtn" class="btn btn-secondary">Open QR Image</button>
+                <button type="button" id="closeQrModalBtn" class="btn btn-danger">Close</button>
+            </div>
+        </div>
     </div>
 </div>
 

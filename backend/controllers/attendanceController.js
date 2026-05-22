@@ -1,10 +1,30 @@
 const attendanceModel = require('../models/attendanceModel');
 const memberModel = require('../models/memberModel');
 
+function extractAttendanceCode(input) {
+    const raw = String(input || '').trim();
+    if (!raw) return '';
+
+    if (raw.startsWith('CMS-ATTENDANCE:')) {
+        return raw.slice('CMS-ATTENDANCE:'.length).trim();
+    }
+
+    try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && parsed.attendanceCode) {
+            return String(parsed.attendanceCode).trim();
+        }
+    } catch (err) {
+        // Keep raw string fallback.
+    }
+
+    return raw;
+}
+
 // Record attendance
 exports.markAttendance = async (req, res) => {
     try {
-        let { memberId, memberName, date } = req.body;
+        let { memberId, memberName, date, source } = req.body;
         const userId = req.user.id;
 
         // If memberName is provided, look up the member by name
@@ -25,10 +45,52 @@ exports.markAttendance = async (req, res) => {
 
         // normalize date (allow null -> now)
         date = date === undefined || date === null ? null : date;
+        source = String(source || 'manual').trim().toLowerCase() || 'manual';
 
-        const record = await attendanceModel.addAttendance({ memberId, date, createdBy: userId });
+        const record = await attendanceModel.addAttendance({ memberId, date, createdBy: userId, source });
         const message = record.alreadyMarked ? "Attendance already marked for this date" : "Attendance marked successfully";
         res.json({ message, attendance: record });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+exports.scanQrAttendance = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const source = 'qr';
+        const attendanceCode = extractAttendanceCode(req.body?.attendanceCode || req.body?.qrData || req.body?.code);
+        const date = req.body?.date === undefined || req.body?.date === null ? null : req.body.date;
+
+        if (!attendanceCode) {
+            return res.status(400).json({ error: 'attendanceCode or qrData is required' });
+        }
+
+        const member = await memberModel.getMemberByAttendanceCode(attendanceCode);
+        if (!member) {
+            return res.status(404).json({ error: 'No member matches the scanned QR code' });
+        }
+
+        const record = await attendanceModel.addAttendance({
+            memberId: member.id,
+            date,
+            createdBy: userId,
+            source
+        });
+
+        const message = record.alreadyMarked
+            ? `${member.name} was already marked present today`
+            : `${member.name} checked in successfully`;
+
+        res.json({
+            message,
+            member: {
+                id: member.id,
+                name: member.name,
+                attendance_code: member.attendance_code
+            },
+            attendance: record
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

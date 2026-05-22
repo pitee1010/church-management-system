@@ -15,6 +15,7 @@ const memberModel = require('../models/memberModel');
 
 router.post("/", verifyToken, createMember);
 router.get("/", verifyToken, getMembers);
+router.get("/my-pass", authMiddleware, membersController.getMyMemberPass);
 router.delete('/:id', authMiddleware, membersController.deleteMember);
 router.put('/:id', authMiddleware, membersController.updateMember);
 router.get('/stats', authMiddleware, async (req, res) => {

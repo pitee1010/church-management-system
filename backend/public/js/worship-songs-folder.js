@@ -31,6 +31,32 @@ const folderSongStatus = document.getElementById("folderSongStatus");
 
 let activeFolder = null;
 
+function buildFreshApiUrl(path, params = {}) {
+    const url = new URL(path, window.location.origin);
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+            url.searchParams.set(key, value);
+        }
+    });
+    url.searchParams.set("_ts", Date.now().toString());
+    return url.toString();
+}
+
+async function fetchFreshJson(path, params = {}) {
+    const res = await fetch(buildFreshApiUrl(path, params), {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Cache-Control": "no-cache"
+        },
+        cache: "no-store"
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+        throw new Error(data.error || "Request failed");
+    }
+    return data;
+}
+
 if (canManageSongs && folderUploadCard) {
     folderUploadCard.style.display = "block";
 }
@@ -184,25 +210,13 @@ function renderFolderSongs(items) {
 }
 
 async function loadFolder() {
-    const res = await fetch(`/api/worship-songs/folders/${folderId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-        throw new Error(data.error || "Failed to load worship folder");
-    }
+    const data = await fetchFreshJson(`/api/worship-songs/folders/${folderId}`);
     activeFolder = data;
     renderFolderHeader(activeFolder);
 }
 
 async function loadFolderSongs() {
-    const res = await fetch(`/api/worship-songs?folder_id=${encodeURIComponent(folderId)}`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await res.json().catch(() => ([]));
-    if (!res.ok) {
-        throw new Error(data.error || "Failed to load worship songs");
-    }
+    const data = await fetchFreshJson("/api/worship-songs", { folder_id: folderId, include_file_data: 1 });
     renderFolderSongs(Array.isArray(data) ? data : []);
 }
 

@@ -79,6 +79,7 @@
             <p class="page-intro">Record member presence, filter by department, and review the attendance story in one clearer workspace.</p>
         </div>
         <div class="header-actions">
+            <button class="btn btn-primary" onclick="window.location.href='qr-attendance.html'">QR Check-In</button>
             <button class="btn btn-outline" onclick="window.location.href='dashboard.html'">&larr; Back</button>
             <button id="logoutBtn" class="btn btn-danger">Logout</button>
         </div>
@@ -88,6 +89,7 @@
         <div class="attendance-grid">
             <div class="light-panel">
                 <h3>Mark Member Attendance</h3>
+                <p class="muted">Use the normal form below or switch to <a href="qr-attendance.html">QR Check-In</a> for faster bulk attendance capture at the entrance.</p>
                 <form id="attendanceForm">
                     <label>Department:</label>
                     <select id="departmentSelect">
@@ -200,6 +202,8 @@ const DEFAULT_DEPARTMENTS = [
     "Decorators",
     "Kitchen",
     "Sunday School Teachers",
+    "Protocal",
+    "Evangelism",
 ];
 
 document.getElementById('logoutBtn').addEventListener('click',()=>{
