@@ -9,6 +9,7 @@ const path = require("path");
 const app = express();
 // determine port, try environment then default. we'll attempt to find a free one if default is busy
 let PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+let bootstrapPromise;
 
 // helper to find a free port starting from a given port
 const net = require('net');
@@ -75,6 +76,38 @@ app.use((req, res, next) => {
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, "public")));
 
+async function bootstrapApp() {
+    if (!bootstrapPromise) {
+        bootstrapPromise = (async () => {
+            await require("./migrations/run_migrations");
+            const { createAdminIfNotExists } = require("./models/userModel");
+            await createAdminIfNotExists().catch(err => console.error(err));
+        })().catch((err) => {
+            bootstrapPromise = null;
+            throw err;
+        });
+    }
+
+    return bootstrapPromise;
+}
+
+app.use("/api", async (req, res, next) => {
+    if (req.path === "/health") {
+        return next();
+    }
+
+    try {
+        await bootstrapApp();
+        next();
+    } catch (err) {
+        console.error("Application bootstrap failed:", err);
+        res.status(500).json({
+            error: "Server database configuration error",
+            details: process.env.NODE_ENV === "production" ? undefined : err.message
+        });
+    }
+});
+
 // =====================
 // ROUTES
 // =====================
@@ -128,14 +161,11 @@ app.use((req, res) => {
 
 async function startServer() {
     try {
-        await require("./migrations/run_migrations");
+        await bootstrapApp();
     } catch (e) {
         console.error("Migrations failed, exiting.", e.message);
         process.exit(1);
     }
-
-    const { createAdminIfNotExists } = require("./models/userModel");
-    await createAdminIfNotExists().catch(err => console.error(err));
 
     // if port is specified but in use, find another
     try {
