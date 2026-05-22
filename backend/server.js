@@ -126,7 +126,7 @@ app.use((req, res) => {
 // START SERVER
 // =====================
 
-(async () => {
+async function startServer() {
     try {
         await require("./migrations/run_migrations");
     } catch (e) {
@@ -157,4 +157,11 @@ app.use((req, res) => {
         }
         process.exit(1);
     });
-})();
+}
+
+if (require.main === module) {
+    startServer();
+}
+
+module.exports = app;
+module.exports.startServer = startServer;
