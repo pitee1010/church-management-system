@@ -241,13 +241,16 @@ exports.initiateBankRedirect = async (req, res) => {
 
         const redirectBase = getBankRedirectBaseUrl();
         if (!redirectBase) {
+            const internalRedirectUrl = `/contribution.html?type=${encodeURIComponent(type)}&paymentId=${paymentId}&paymentStatus=bank-pending&bankReference=${encodeURIComponent(externalReference)}`;
             await paymentsModel.updatePayment(paymentId, {
+                redirect_url: internalRedirectUrl,
                 response_message: `Use bank reference ${externalReference} when paying through your bank.`
             });
 
             return res.status(201).json({
                 message: "Bank payment instructions are ready",
                 paymentId,
+                redirectUrl: internalRedirectUrl,
                 status: "pending",
                 bankInstruction: {
                     reference: externalReference,

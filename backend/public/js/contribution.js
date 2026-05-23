@@ -31,6 +31,7 @@ const params = new URLSearchParams(window.location.search);
 const contributionType = params.get("type");
 const paymentIdFromUrl = params.get("paymentId");
 const paymentStatusFromUrl = params.get("paymentStatus");
+const bankReferenceFromUrl = params.get("bankReference");
 
 const TYPE_META = {
     "missions": {
@@ -339,6 +340,9 @@ async function initiateBankRedirect() {
 
         if (data.bankInstruction) {
             const instruction = data.bankInstruction;
+            if (data.redirectUrl) {
+                window.history.pushState({}, "", data.redirectUrl);
+            }
             showPaymentStatus(
                 `Bank payment reference created: ${instruction.reference}. Use this reference with the account details above, then keep this page open to track the payment.`,
                 "info"
@@ -464,5 +468,5 @@ if (paymentStatusFromUrl === "completed") {
 } else if (paymentStatusFromUrl === "failed" || paymentStatusFromUrl === "cancelled") {
     showPaymentStatus("Bank payment was not completed.", "error");
 } else if (paymentStatusFromUrl === "bank-pending") {
-    showPaymentStatus("Bank payment reference created. Complete payment using the account details and generated reference.", "info");
+    showPaymentStatus(`Bank payment reference created${bankReferenceFromUrl ? `: ${bankReferenceFromUrl}` : ""}. Complete payment using the account details and generated reference.`, "info");
 }
