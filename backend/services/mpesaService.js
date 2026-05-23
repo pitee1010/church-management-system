@@ -1,5 +1,13 @@
 const crypto = require("crypto");
 
+function envValue(...names) {
+    for (const name of names) {
+        const value = String(process.env[name] || "").trim();
+        if (value) return value;
+    }
+    return "";
+}
+
 function envName() {
     return String(process.env.MPESA_ENV || "sandbox").trim().toLowerCase();
 }
@@ -31,8 +39,8 @@ function callbackUrl(baseAppUrl = "") {
 }
 
 function authHeader() {
-    const key = process.env.MPESA_CONSUMER_KEY;
-    const secret = process.env.MPESA_CONSUMER_SECRET;
+    const key = envValue("MPESA_CONSUMER_KEY", "SAFARICOM_CONSUMER_KEY", "DARAJA_CONSUMER_KEY");
+    const secret = envValue("MPESA_CONSUMER_SECRET", "SAFARICOM_CONSUMER_SECRET", "DARAJA_CONSUMER_SECRET");
     if (!key || !secret) {
         throw new Error("Missing M-Pesa credentials");
     }
@@ -62,21 +70,26 @@ exports.getCallbackUrl = (baseAppUrl = "") => callbackUrl(baseAppUrl);
 
 exports.getConfigStatus = (baseAppUrl = "") => {
     const missing = [];
+    const shortcode = envValue("MPESA_SHORTCODE", "MPESA_BUSINESS_SHORTCODE", "MPESA_PAYBILL", "MPESA_TILL");
+    const passkey = envValue("MPESA_PASSKEY", "MPESA_STK_PASSKEY", "DARAJA_PASSKEY");
 
-    if (!process.env.MPESA_CONSUMER_KEY) missing.push("MPESA_CONSUMER_KEY");
-    if (!process.env.MPESA_CONSUMER_SECRET) missing.push("MPESA_CONSUMER_SECRET");
-    if (!process.env.MPESA_SHORTCODE) missing.push("MPESA_SHORTCODE");
-    if (!process.env.MPESA_PASSKEY) missing.push("MPESA_PASSKEY");
+    if (!envValue("MPESA_CONSUMER_KEY", "SAFARICOM_CONSUMER_KEY", "DARAJA_CONSUMER_KEY")) missing.push("MPESA_CONSUMER_KEY");
+    if (!envValue("MPESA_CONSUMER_SECRET", "SAFARICOM_CONSUMER_SECRET", "DARAJA_CONSUMER_SECRET")) missing.push("MPESA_CONSUMER_SECRET");
+    if (!shortcode) missing.push("MPESA_SHORTCODE");
+    if (!passkey) missing.push("MPESA_PASSKEY");
 
     const resolvedCallbackUrl = callbackUrl(baseAppUrl);
     if (!resolvedCallbackUrl) {
         missing.push("MPESA_CALLBACK_URL or APP_BASE_URL");
+    } else if (!/^https:\/\//i.test(resolvedCallbackUrl)) {
+        missing.push("HTTPS MPESA_CALLBACK_URL or APP_BASE_URL");
     }
 
     return {
         enabled: missing.length === 0,
         environment: envName(),
-        shortcode: process.env.MPESA_SHORTCODE || "",
+        shortcode,
+        transactionType: envValue("MPESA_TRANSACTION_TYPE") || "CustomerPayBillOnline",
         callbackUrl: resolvedCallbackUrl,
         missing
     };
@@ -103,10 +116,16 @@ exports.initiateStkPush = async ({
     description,
     callbackUrl: callbackUrlOverride
 }) => {
+    const amountNum = Math.round(Number(amount));
+    if (!Number.isFinite(amountNum) || amountNum < 1) {
+        throw new Error("M-Pesa amount must be at least KSH 1");
+    }
+
     const accessToken = await getAccessToken();
     const ts = timestamp();
-    const shortcode = process.env.MPESA_SHORTCODE;
-    const passkey = process.env.MPESA_PASSKEY;
+    const shortcode = envValue("MPESA_SHORTCODE", "MPESA_BUSINESS_SHORTCODE", "MPESA_PAYBILL", "MPESA_TILL");
+    const partyB = envValue("MPESA_PARTY_B", "MPESA_PARTYB", "MPESA_SHORTCODE", "MPESA_BUSINESS_SHORTCODE", "MPESA_PAYBILL", "MPESA_TILL");
+    const passkey = envValue("MPESA_PASSKEY", "MPESA_STK_PASSKEY", "DARAJA_PASSKEY");
     const password = Buffer.from(`${shortcode}${passkey}${ts}`).toString("base64");
     const resolvedCallbackUrl = callbackUrlOverride || callbackUrl();
 
@@ -124,20 +143,20 @@ exports.initiateStkPush = async ({
             BusinessShortCode: shortcode,
             Password: password,
             Timestamp: ts,
-            TransactionType: process.env.MPESA_TRANSACTION_TYPE || "CustomerPayBillOnline",
-            Amount: Math.round(Number(amount)),
+            TransactionType: envValue("MPESA_TRANSACTION_TYPE") || "CustomerPayBillOnline",
+            Amount: amountNum,
             PartyA: phoneNumber,
-            PartyB: shortcode,
+            PartyB: partyB,
             PhoneNumber: phoneNumber,
             CallBackURL: resolvedCallbackUrl,
-            AccountReference: accountReference,
-            TransactionDesc: description || "Church contribution payment"
+            AccountReference: String(accountReference || "CHURCH").slice(0, 12),
+            TransactionDesc: String(description || "Church contribution").slice(0, 60)
         })
     });
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.ResponseCode !== "0") {
-        throw new Error(data.errorMessage || data.ResponseDescription || "Failed to initiate STK push");
+        throw new Error(data.errorMessage || data.ResponseDescription || data.CustomerMessage || "Failed to initiate STK push");
     }
 
     return data;
