@@ -51,7 +51,7 @@
         <div>
             <span class="page-kicker">Communication</span>
             <h1>Announcements</h1>
-            <p class="page-intro">Publish church-wide updates and, for admins, send focused SMS communication to members.</p>
+            <p class="page-intro">Publish church-wide updates and, for admins, send focused SMS or email communication.</p>
         </div>
         <div class="header-actions">
             <button class="btn btn-outline" onclick="window.location.href='dashboard.html'">&larr; Back</button>
@@ -84,7 +84,8 @@
             <h3>Create Announcement</h3>
             <input id="title" placeholder="Title">
             <textarea id="message" placeholder="Message"></textarea>
-            <label id="sendSMSOption"><input type="checkbox" id="sendSMS" style="width:auto; min-height:auto; margin-right:8px; margin-bottom:0;"> Send SMS to all members</label>
+            <label id="sendSMSOption"><input type="checkbox" id="sendSMS" style="width:auto; min-height:auto; margin-right:8px; margin-bottom:0;"> Send SMS to all members with phone numbers</label>
+            <label id="sendEmailOption"><input type="checkbox" id="sendEmail" style="width:auto; min-height:auto; margin-right:8px; margin-bottom:0;"> Send email to all users with email addresses</label>
             <button id="createBtn" class="btn btn-secondary">Create</button>
             <div id="createStatus"></div>
         </div>

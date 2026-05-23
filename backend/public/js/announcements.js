@@ -21,6 +21,7 @@ if (role === 'normaluser') {
 
 if (role !== 'admin') {
   document.getElementById('sendSMSOption')?.setAttribute('style', 'display:none;');
+  document.getElementById('sendEmailOption')?.setAttribute('style', 'display:none;');
 }
 
 async function loadAnnouncements(){
@@ -137,13 +138,14 @@ document.getElementById('createBtn')?.addEventListener('click', async ()=>{
   const title = document.getElementById('title').value.trim();
   const message = document.getElementById('message').value.trim();
   const sendSMS = document.getElementById('sendSMS').checked;
+  const sendEmail = document.getElementById('sendEmail').checked;
   const statusDiv = document.getElementById('createStatus');
   if(!title || !message) return alert('Title and message required');
   statusDiv.innerHTML = '<div class="status-info">Creating announcement...</div>';
   const res = await fetch('/api/announcements', {
     method:'POST',
     headers: { 'Content-Type':'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ title, message, sendSMSToMembers: sendSMS })
+    body: JSON.stringify({ title, message, sendSMSToMembers: sendSMS, sendEmailToMembers: sendEmail })
   });
   const data = await res.json().catch(() => ({}));
   if(!res.ok) {
@@ -159,11 +161,19 @@ document.getElementById('createBtn')?.addEventListener('click', async ()=>{
       statusMsg += `. SMS sending status: ${data.smsSummary.error || 'unknown error'}`;
     }
   }
+  if (data.emailSummary?.attempted) {
+    if (data.emailSummary.sent) {
+      statusMsg += ` and email sent to ${data.emailSummary.recipients} recipient(s)`;
+    } else {
+      statusMsg += `. Email sending status: ${data.emailSummary.error || 'unknown error'}`;
+    }
+  }
   statusDiv.innerHTML = `<div class="success">${statusMsg}</div>`;
 
   document.getElementById('title').value='';
   document.getElementById('message').value='';
   document.getElementById('sendSMS').checked=false;
+  document.getElementById('sendEmail').checked=false;
   loadAnnouncements();
 });
 
