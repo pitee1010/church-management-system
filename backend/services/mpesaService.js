@@ -84,10 +84,12 @@ exports.getConfigStatus = (baseAppUrl = "") => {
 
 exports.normalizePhone = (phone) => {
     const digits = String(phone || "").replace(/\D/g, "");
-    if (digits.startsWith("254")) return digits;
-    if (digits.startsWith("0")) return `254${digits.slice(1)}`;
-    if (digits.length === 9) return `254${digits}`;
-    return digits;
+    let normalized = digits;
+    if (digits.startsWith("254")) normalized = digits;
+    else if (digits.startsWith("0")) normalized = `254${digits.slice(1)}`;
+    else if (digits.length === 9) normalized = `254${digits}`;
+
+    return /^2547\d{8}$/.test(normalized) ? normalized : "";
 };
 
 exports.createExternalReference = (prefix = "PAY") => {

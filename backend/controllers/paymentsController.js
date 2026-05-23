@@ -29,10 +29,13 @@ function appBaseUrl(req) {
 function paymentConfigResponse(req) {
     const base = appBaseUrl(req);
     const mpesa = mpesaService.getConfigStatus(base);
+    const bankRedirectBaseUrl = getBankRedirectBaseUrl();
     return {
         mpesa,
         bankRedirect: {
-            enabled: Boolean(getBankRedirectBaseUrl())
+            enabled: true,
+            mode: bankRedirectBaseUrl ? "redirect" : "instructions",
+            providerConfigured: Boolean(bankRedirectBaseUrl)
         }
     };
 }
@@ -64,9 +67,16 @@ async function resolveMember(memberId, memberName) {
     return member;
 }
 
-async function resolveMemberForRequest(req, memberId, memberName) {
+async function ensureMemberForRequest(req, memberId, memberName, phoneNumber) {
     if (req.user?.role === "admin") {
-        return resolveMember(memberId, memberName);
+        const member = await resolveMember(memberId, memberName);
+        if (member || !memberName) return member;
+        const insertId = await Member.createMember({
+            name: String(memberName).trim(),
+            phone: phoneNumber || null,
+            created_by: req.user?.id || null
+        });
+        return Member.getById(insertId);
     }
 
     const accountName = String(req.user?.name || "").trim();
@@ -74,7 +84,15 @@ async function resolveMemberForRequest(req, memberId, memberName) {
         return null;
     }
 
-    return resolveMember(null, accountName);
+    const member = await resolveMember(null, accountName);
+    if (member) return member;
+
+    const insertId = await Member.createMember({
+        name: accountName,
+        phone: phoneNumber || null,
+        created_by: req.user?.id || null
+    });
+    return Member.getById(insertId);
 }
 
 exports.getPaymentStatus = async (req, res) => {
@@ -124,8 +142,13 @@ exports.initiateMpesaStk = async (req, res) => {
             });
         }
 
-        const member = await resolveMemberForRequest(req, memberId, memberName);
-        if (!member) return res.status(404).json({ error: "Member not found" });
+        const phoneNumber = mpesaService.normalizePhone(phone);
+        if (!phoneNumber) {
+            return res.status(400).json({ error: "Enter a valid Safaricom phone number, for example 0712345678 or 254712345678" });
+        }
+
+        const member = await ensureMemberForRequest(req, memberId, memberName, phoneNumber);
+        if (!member) return res.status(404).json({ error: "Member not found and could not be created" });
 
         const amountNum = Number(amount);
         if (!Number.isFinite(amountNum) || amountNum <= 0) {
@@ -135,11 +158,6 @@ exports.initiateMpesaStk = async (req, res) => {
         const type = String(contributionType || "general").trim();
         if (!ALLOWED_TYPES.has(type)) {
             return res.status(400).json({ error: "Invalid contribution type" });
-        }
-
-        const phoneNumber = mpesaService.normalizePhone(phone || member.phone);
-        if (!phoneNumber) {
-            return res.status(400).json({ error: "A valid phone number is required for STK push" });
         }
 
         const externalReference = mpesaService.createExternalReference(buildContributionReference(type));
@@ -193,9 +211,9 @@ exports.initiateMpesaStk = async (req, res) => {
 
 exports.initiateBankRedirect = async (req, res) => {
     try {
-        const { memberId, memberName, amount, description, contributionType } = req.body;
-        const member = await resolveMemberForRequest(req, memberId, memberName);
-        if (!member) return res.status(404).json({ error: "Member not found" });
+        const { memberId, memberName, amount, description, contributionType, phone } = req.body;
+        const member = await ensureMemberForRequest(req, memberId, memberName, phone || null);
+        if (!member) return res.status(404).json({ error: "Member not found and could not be created" });
 
         const amountNum = Number(amount);
         if (!Number.isFinite(amountNum) || amountNum <= 0) {
@@ -205,13 +223,6 @@ exports.initiateBankRedirect = async (req, res) => {
         const type = String(contributionType || "general").trim();
         if (!ALLOWED_TYPES.has(type)) {
             return res.status(400).json({ error: "Invalid contribution type" });
-        }
-
-        const redirectBase = getBankRedirectBaseUrl();
-        if (!redirectBase) {
-            return res.status(501).json({
-                error: "Bank redirect payment is not configured yet. Add BANK_PAYMENT_REDIRECT_URL and provider return URLs in the server environment."
-            });
         }
 
         const externalReference = mpesaService.createExternalReference(`BANK-${buildContributionReference(type)}`);
@@ -227,6 +238,25 @@ exports.initiateBankRedirect = async (req, res) => {
             created_by: req.user?.id || null,
             external_reference: externalReference
         });
+
+        const redirectBase = getBankRedirectBaseUrl();
+        if (!redirectBase) {
+            await paymentsModel.updatePayment(paymentId, {
+                response_message: `Use bank reference ${externalReference} when paying through your bank.`
+            });
+
+            return res.status(201).json({
+                message: "Bank payment instructions are ready",
+                paymentId,
+                status: "pending",
+                bankInstruction: {
+                    reference: externalReference,
+                    amount: amountNum,
+                    contributionType: type,
+                    donorName: member.name
+                }
+            });
+        }
 
         const redirectUrl = buildBankRedirectUrl(req, {
             paymentId,

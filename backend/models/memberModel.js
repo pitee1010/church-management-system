@@ -43,7 +43,7 @@ exports.createMember = async (member) => {
     const serializedDepartments = serializeDepartments(departments ?? department);
     const [result] = await db.execute(
         "INSERT INTO members (name,gender,department,phone,photo_url,address,created_by) VALUES (?,?,?,?,?,?,?)",
-        [name, gender || null, serializedDepartments, phone, photo_url || null, address, created_by]
+        [name, gender || null, serializedDepartments, phone || null, photo_url || null, address || null, created_by || null]
     );
     const attendanceCode = `CHM-${String(result.insertId).padStart(6, "0")}`;
     await db.execute("UPDATE members SET attendance_code = ? WHERE id = ?", [attendanceCode, result.insertId]);

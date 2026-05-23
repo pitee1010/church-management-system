@@ -138,8 +138,11 @@ async function fetchPaymentConfig() {
         setMethodAvailability(mpesaPayBtn, mpesaStatusNote, mpesaEnabled, mpesaMessage, mpesaPaymentOption);
 
         const bankEnabled = Boolean(data?.bankRedirect?.enabled);
-        const bankMessage = bankEnabled
+        const bankMode = data?.bankRedirect?.mode || "instructions";
+        const bankMessage = bankEnabled && bankMode === "redirect"
             ? "Bank redirect is available."
+            : bankEnabled
+                ? "Bank instructions are available. A payment reference will be generated."
             : "Bank redirect is not configured on the server.";
         setMethodAvailability(bankPayBtn, bankStatusNote, bankEnabled, bankMessage, bankPaymentOption);
     } catch (err) {
@@ -334,6 +337,18 @@ async function initiateBankRedirect() {
             throw new Error(data.error || "Failed to prepare bank redirect");
         }
 
+        if (data.bankInstruction) {
+            const instruction = data.bankInstruction;
+            showPaymentStatus(
+                `Bank payment reference created: ${instruction.reference}. Use this reference with the account details above, then keep this page open to track the payment.`,
+                "info"
+            );
+            if (data.paymentId) {
+                await startPaymentStatusPolling(data.paymentId);
+            }
+            return;
+        }
+
         showPaymentStatus("Redirecting to bank payment provider...");
         if (data.redirectUrl) {
             window.location.href = data.redirectUrl;
@@ -448,4 +463,6 @@ if (paymentStatusFromUrl === "completed") {
     showPaymentStatus("Payment completed and recorded successfully.", "success");
 } else if (paymentStatusFromUrl === "failed" || paymentStatusFromUrl === "cancelled") {
     showPaymentStatus("Bank payment was not completed.", "error");
+} else if (paymentStatusFromUrl === "bank-pending") {
+    showPaymentStatus("Bank payment reference created. Complete payment using the account details and generated reference.", "info");
 }
