@@ -24,8 +24,19 @@
             overflow-x: hidden;
         }
 
+        .video-bg {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+            background: #05162a;
+        }
+
         .overlay {
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8));
+            position: relative;
+            background: linear-gradient(rgba(5, 22, 42, 0.56), rgba(5, 22, 42, 0.86));
             min-height: 100vh;
         }
 
@@ -303,6 +314,10 @@
 </head>
 
 <body>
+
+<video class="video-bg" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+    <source src="assets/e26c418dd6be6ce377b9b2b870c54823.mp4" type="video/mp4">
+</video>
 
 <div class="overlay">
     <header>
