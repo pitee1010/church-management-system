@@ -44,11 +44,11 @@ const TYPE_META = {
     },
     "tithes-offerings": {
         title: "Tithes and Offerings Contributions",
-        bank: "Diamond Trust Bank",
-        accountName: "Ministry of Repentance and Holiness",
-        accountNumber: "0055227001",
-        paybill: "516600",
-        reference: "TITHE"
+        bank: "N/A",
+        accountName: "N/A",
+        accountNumber: "N/A",
+        paybill: "N/A",
+        reference: "N/A"
     },
     "tabernacle-construction": {
         title: "Tabernacle Construction Contributions",
