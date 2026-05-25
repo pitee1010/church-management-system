@@ -106,23 +106,7 @@
             line-height: 1.08;
         }
 
-        /* 1. SLIDER (Resized) */
-        .slider { width: 100%; overflow: hidden; border-bottom: 5px solid var(--accent-gold); }
-        .slides { display: flex; width: 400%; animation: slide 20s infinite; }
-        .slides img { 
-            width: 100%; 
-            height: 400px; 
-            object-fit: cover; 
-        }
-
-        @keyframes slide {
-            0%, 20% { transform: translateX(0); }
-            25%, 45% { transform: translateX(-25%); }
-            50%, 70% { transform: translateX(-50%); }
-            75%, 100% { transform: translateX(-75%); }
-        }
-
-        /* 2. MARQUEE (Dynamic Scroll) */
+        /* MARQUEE (Dynamic Scroll) */
         .marquee-container {
             width: 100%;
             overflow: hidden;
@@ -150,7 +134,7 @@
             100% { transform: translateX(calc(-250px * 5)); }
         }
 
-        /* 3. INFO SECTION & CONSTANT IMAGES */
+        /* INFO SECTION & CONSTANT IMAGES */
         .info-section {
             padding: 60px 10%;
             background: rgba(10, 46, 82, 0.7);
@@ -263,9 +247,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .slides img {
-                height: 260px;
-            }
         }
 
         @media (max-width: 520px) {
@@ -301,10 +282,6 @@
                 margin: 0 10px;
             }
 
-            .slides img {
-                height: 220px;
-            }
-
             .footer-content {
                 grid-template-columns: 1fr;
                 gap: 24px;
@@ -316,7 +293,7 @@
 <body>
 
 <video class="video-bg" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-    <source src="assets/e26c418dd6be6ce377b9b2b870c54823.mp4" type="video/mp4">
+    <source src="assets/VID-20260524-WA0017(1).mp4" type="video/mp4">
 </video>
 
 <div class="overlay">
@@ -374,18 +351,6 @@
             <img src="assets/20250817_112943.png" alt="5">
         </div>
     </div>
-
-    <section class="slider">
-        <div class="slides">
-            <img src="assets/IMG-20231219-WA0034.jpg" alt="Slide 1">
-            <img src="assets/IMG-20231219-WA0034.jpg" alt="Slide 2">
-            <img src="assets/IMG-20231219-WA0036.jpg" alt="Slide 3">
-            <img src="assets/IMG-20231219-WA0039.jpg" alt="Slide 4">
-        </div>
-    </section>
-
-  
-  
 
     <section class="section">
         <h2 style="color: var(--accent-gold);">Live Sermons</h2>
