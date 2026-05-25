@@ -34,6 +34,29 @@
             background: #05162a;
         }
 
+        .video-watermark-mask {
+            position: fixed;
+            z-index: -1;
+            pointer-events: none;
+            background: rgba(5, 22, 42, 0.78);
+            backdrop-filter: blur(12px);
+            border-radius: 14px;
+        }
+
+        .video-watermark-mask.top {
+            top: 76px;
+            left: 12px;
+            width: min(220px, 46vw);
+            height: 74px;
+        }
+
+        .video-watermark-mask.bottom {
+            right: 12px;
+            bottom: 12px;
+            width: min(250px, 52vw);
+            height: 88px;
+        }
+
         .overlay {
             position: relative;
             background: linear-gradient(rgba(5, 22, 42, 0.56), rgba(5, 22, 42, 0.86));
@@ -106,51 +129,7 @@
             line-height: 1.08;
         }
 
-        /* 1. SLIDER (Resized) */
-        .slider { width: 100%; overflow: hidden; border-bottom: 5px solid var(--accent-gold); }
-        .slides { display: flex; width: 400%; animation: slide 20s infinite; }
-        .slides img { 
-            width: 100%; 
-            height: 400px; 
-            object-fit: cover; 
-        }
-
-        @keyframes slide {
-            0%, 20% { transform: translateX(0); }
-            25%, 45% { transform: translateX(-25%); }
-            50%, 70% { transform: translateX(-50%); }
-            75%, 100% { transform: translateX(-75%); }
-        }
-
-        /* 2. MARQUEE (Dynamic Scroll) */
-        .marquee-container {
-            width: 100%;
-            overflow: hidden;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 20px 0;
-            border-bottom: 2px solid var(--accent-gold);
-        }
-
-        .marquee-content {
-            display: flex;
-            width: calc(250px * 10);
-            animation: scroll 30s linear infinite;
-        }
-
-        .marquee-content img {
-            width: 220px;
-            height: 140px;
-            margin: 0 15px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        @keyframes scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(calc(-250px * 5)); }
-        }
-
-        /* 3. INFO SECTION & CONSTANT IMAGES */
+        /* INFO SECTION & CONSTANT IMAGES */
         .info-section {
             padding: 60px 10%;
             background: rgba(10, 46, 82, 0.7);
@@ -263,9 +242,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .slides img {
-                height: 260px;
-            }
         }
 
         @media (max-width: 520px) {
@@ -295,16 +271,6 @@
                 line-height: 1.15;
             }
 
-            .marquee-content img {
-                width: 170px;
-                height: 108px;
-                margin: 0 10px;
-            }
-
-            .slides img {
-                height: 220px;
-            }
-
             .footer-content {
                 grid-template-columns: 1fr;
                 gap: 24px;
@@ -316,8 +282,10 @@
 <body>
 
 <video class="video-bg" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-    <source src="assets/e26c418dd6be6ce377b9b2b870c54823.mp4" type="video/mp4">
+    <source src="assets/VID-20260524-WA0017(1).mp4" type="video/mp4">
 </video>
+<div class="video-watermark-mask top" aria-hidden="true"></div>
+<div class="video-watermark-mask bottom" aria-hidden="true"></div>
 
 <div class="overlay">
     <header>
@@ -358,29 +326,6 @@
                 <h3>Global Events</h3>
                 <p>Live streams of massive healing altars and conferences worldwide.</p>
             </div>
-        </div>
-    </section>
-  <div class="marquee-container">
-        <div class="marquee-content">
-            <img src="assets/7a5e6b93617a6a3f6539258edfd64c94.png" alt="1">
-            <img src="assets/53ea554392b5db941f977291507172ce.png" alt="2">
-            <img src="assets/19875ebf1d633e553e5b0082deca9b6a.png" alt="3">
-            <img src="assets/5efa1efcdb1913e68c23b904fb16644a.png" alt="4">
-            <img src="assets/ad38be7175c3aa9ca36f321c418ac34b.png" alt="5">
-            <img src="assets/IMG-20231219-WA0036.jpg" alt="1">
-            <img src="assets/IMG-20231219-WA0036.jpg" alt="2">
-            <img src="assets/IMG-20231219-WA0039.jpg" alt="3">
-            <img src="assets/IMG-20231219-WA0038.jpg" alt="4">
-            <img src="assets/20250817_112943.png" alt="5">
-        </div>
-    </div>
-
-    <section class="slider">
-        <div class="slides">
-            <img src="assets/IMG-20231219-WA0034.jpg" alt="Slide 1">
-            <img src="assets/IMG-20231219-WA0034.jpg" alt="Slide 2">
-            <img src="assets/IMG-20231219-WA0036.jpg" alt="Slide 3">
-            <img src="assets/IMG-20231219-WA0039.jpg" alt="Slide 4">
         </div>
     </section>
 
@@ -436,5 +381,17 @@
     </footer>
 </div>
 
+<script>
+    const bgVideo = document.querySelector(".video-bg");
+    if (bgVideo) {
+        bgVideo.loop = false;
+        bgVideo.addEventListener("timeupdate", () => {
+            if (Number.isFinite(bgVideo.duration) && bgVideo.duration - bgVideo.currentTime <= 2.8) {
+                bgVideo.currentTime = 0;
+                bgVideo.play().catch(() => {});
+            }
+        });
+    }
+</script>
 </body>
 </html>
