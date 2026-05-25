@@ -67,6 +67,13 @@
 
         .video-item:hover { background: rgba(212, 175, 55, 0.2); }
 
+        .video-thumb {
+            width: 80px;
+            height: 54px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+
         /* Audio Section */
         .audio-grid {
             background: var(--glass);
@@ -84,7 +91,27 @@
 
         .audio-row:hover { background: rgba(255,255,255,0.03); }
 
-        audio { height: 30px; filter: invert(100%); }
+        audio { height: 30px; filter: invert(100%); width: 100%; }
+
+        @media (max-width: 800px) {
+            .video-highlight {
+                grid-template-columns: 1fr;
+            }
+
+            .video-list {
+                height: auto;
+            }
+
+            .audio-row {
+                grid-template-columns: 36px 1fr;
+                gap: 10px;
+            }
+
+            .audio-row span:nth-child(3),
+            .audio-row audio {
+                grid-column: 2;
+            }
+        }
     </style>
 </head>
 <body>
@@ -98,8 +125,8 @@
     <h2>Video Worship</h2>
     <div class="video-highlight">
         <div class="main-player">
-            <video id="worshipVideo" controls width="100%" poster="assets/603079446b193ee1864c93a1831dd86c.mp4">
-                <source src="assets/5a616d19fca5fd3b173e8cc062aad49b.mp4" type="video/mp4">
+            <video id="worshipVideo" controls width="100%" poster="assets/19875ebf1d633e553e5b0082deca9b6a.png">
+                <source src="assets/VID-20260524-WA0013.mp4" type="video/mp4">
             </video>
         </div>
         <div class="video-list" id="videoPlaylist">
@@ -118,20 +145,19 @@
 
 <script>
     const videos = [
-        { title: "Mighty Miracle Worship", file: "assets/v1.mp4", thumb: "Pictures/img1.jpg" },
-        { title: "Repentance Worship Live", file: "assets/v2.mp4", thumb: "Pictures/img2.jpg" }
+        { title: "Worship Service Moment", file: "assets/VID-20260524-WA0013.mp4", thumb: "assets/IMG-20260522-WA0020.jpg" },
+        { title: "Worship Service Video 2", file: "assets/VID-20260524-WA0012.mp4", thumb: "assets/19875ebf1d633e553e5b0082deca9b6a.png" }
     ];
 
     const audios = [
-        { title: "Holy is the LORD", artist: "Ministry Choir", file: "assets/a1.mp3" },
-        { title: "The Blood of Jesus", artist: "Praise Team", file: "assets/a2.mp3" }
+        { title: "I See Grace", artist: "Worship & Praise", file: "assets/i see grace.mp3" }
     ];
 
     // Load Videos
     const vContainer = document.getElementById('videoPlaylist');
     vContainer.innerHTML = videos.map((v, i) => `
         <div class="video-item" onclick="playVideo('${v.file}')">
-            <img src="${v.thumb}" width="80" style="border-radius:5px">
+            <img src="${v.thumb}" class="video-thumb" alt="${v.title}">
             <div>
                 <div style="font-size:0.9rem">${v.title}</div>
                 <small style="color:#888">Live Worship</small>
